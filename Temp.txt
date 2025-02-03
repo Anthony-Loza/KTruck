@@ -1,0 +1,5 @@
+﻿C:\Users\antho\OneDrive\Desktop\KTruck\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.i.cs
+
+FC:\Users\antho\OneDrive\Desktop\KTruck\CustomerForm.xaml;;
+FC:\Users\antho\OneDrive\Desktop\KTruck\Windows\InvoiceWindow.xaml;;
+FC:\Users\antho\OneDrive\Desktop\KTruck\Windows\VehicleWindow.xaml;;

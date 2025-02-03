@@ -1,0 +1,91 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Models="clr-namespace:KTruckGui.Models" xmlns:Data="clr-namespace:KTruckGui.Data" x:Class="KTruckGui.VehicleWindow"
+        Title="VehicleWindow" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Form Section -->
+        <GroupBox Header="Vehicle Details" Grid.Row="0" Grid.Column="0" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Ensure Unique Control Names -->
+                <TextBlock Text="Owner:" Grid.Row="0" Grid.Column="0" Margin="5"/>
+                <ComboBox x:Name="OwnerComboBox" Grid.Row="0" Grid.Column="1" Margin="5" SelectionChanged="OwnerComboBox_SelectionChanged"/>
+
+                <TextBlock Text="Make:" Grid.Row="1" Grid.Column="0" Margin="5"/>
+                <TextBox x:Name="MakeTextBox" Grid.Row="1" Grid.Column="1" Margin="5" TextChanged="MakeTextBox_TextChanged"/>
+
+                <TextBlock Text="Model:" Grid.Row="2" Grid.Column="0" Margin="5"/>
+                <TextBox x:Name="ModelTextBox" Grid.Row="2" Grid.Column="1" Margin="5"/>
+
+                <TextBlock Text="Year:" Grid.Row="3" Grid.Column="0" Margin="5"/>
+                <TextBox x:Name="YearTextBox" Grid.Row="3" Grid.Column="1" Margin="5"/>
+
+                <TextBlock Text="License Plate:" Grid.Row="4" Grid.Column="0" Margin="5"/>
+                <TextBox x:Name="LicensePlateTextBox" Grid.Row="4" Grid.Column="1" Margin="5"/>
+
+                <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="23,5,0,5">
+                    <Button x:Name="SaveButton" Content="Save Vehicle" Margin="5" Click="SaveButton_Click"/>
+                    <Button x:Name="EditButton" Content="Edit Vehicle" Margin="5" Click="EditButton_Click"/>
+                    <Button x:Name="DeleteButton" Content="Delete Vehicle" Margin="5" Click="DeleteButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Accordion Table Section for Vehicles -->
+        <GroupBox Header="Vehicles List" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Padding="10" Margin="10">
+            <DataGrid ItemsSource="{Binding Vehicles}" AutoGenerateColumns="True" x:Name="VehicleDataGrid" SelectionChanged="VehiclesDataGrid_SelectionChanged" RowEditEnding="VehicleDataGrid_RowEditEnding" IsReadOnly="False" ColumnWidth="*" />
+        </GroupBox>
+
+        <!-- Accounting Summary -->
+        <GroupBox Header="Accounting Summary" Grid.Row="0" Grid.Column="1" Padding="20" BorderBrush="{x:Null}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="176"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Unpaid Amount:" Grid.Row="1" Grid.Column="0" Margin="0,5,10,5"/>
+                <TextBlock x:Name="TotalVehiclesTextBlock" Grid.Row="1" Grid.Column="1" Margin="0,0,131,26" Text="Last Job:" Grid.RowSpan="2"/>
+                <TextBlock Text="Total Mileage:" Grid.Column="1" Margin="0,0,0,26" Grid.RowSpan="2"/>
+                <TextBlock x:Name="TotalMileageTextBlock" Grid.Row="1" Grid.Column="1" Margin="5,0,0,26" Grid.RowSpan="2"/>
+                <TextBlock Text="Total Maint. Cost:" Grid.Column="0" Margin="0,0,10,5"/>
+                <TextBlock x:Name="TotalMaintenanceCostTextBlock" Grid.Row="2" Grid.Column="1" Margin="5,5,5,5"/>
+                <TextBlock Text="Outstanding Balance:" Grid.Row="3" Grid.Column="0" Margin="5,5,5,5"/>
+                <TextBlock x:Name="AverageMileageTextBlock" Grid.Row="3" Grid.Column="1" Margin="5,5,5,5"/>
+                <TextBlock Text="Average Maintenance Cost:" Grid.Row="4" Grid.Column="0" Margin="5,5,5,5"/>
+                <TextBlock x:Name="AverageMaintenanceCostTextBlock" Grid.Row="4" Grid.Column="1" Margin="5,5,5,5"/>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>

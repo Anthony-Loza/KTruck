@@ -1,0 +1,137 @@
+﻿<Window x:Class="KTruckGui.InvoiceForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KTruckGui"
+        xmlns:Assets="clr-namespace:KTruckGui.Assets"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="InvoiceForm" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <!-- Header -->
+            <RowDefinition Height="200"/>
+            <!-- Invoice Details -->
+            <RowDefinition Height="400"/>
+            <!-- Invoice Items -->
+            <RowDefinition Height="100"/>
+            <!-- Total & Actions -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Text="Invoice Management" FontSize="24" FontWeight="Bold" Grid.Row="0" Margin="10"/>
+
+        <!-- Invoice Details Section -->
+        <GroupBox Header="Invoice Details" Grid.Row="1" Margin="5">
+            <Grid Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <!-- Labels -->
+                    <ColumnDefinition Width="300"/>
+                    <!-- Inputs -->
+                    <ColumnDefinition Width="150"/>
+                    <!-- Labels -->
+                    <ColumnDefinition Width="300"/>
+                    <!-- Inputs -->
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Invoice Fields -->
+                <TextBlock Text="Bill To:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="5"/>
+                <ComboBox x:Name="BillToInput" 
+          Grid.Row="0" 
+          Grid.Column="1" 
+          Margin="5" 
+          DisplayMemberPath="FullName" 
+          SelectedValuePath="Id" 
+          SelectionChanged="BillToInput_SelectionChanged" />
+
+                <TextBlock Text="Description:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="5"/>
+                <TextBox x:Name="DescriptionInput" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Margin="5"/>
+
+                <TextBlock Text="Date Created:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="5"/>
+                <DatePicker x:Name="DateCreatedInput" Grid.Row="2" Grid.Column="1" Margin="5"/>
+
+                <TextBlock Text="Due Date:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="2" Margin="5"/>
+                <DatePicker x:Name="DueDateInput" Grid.Row="2" Grid.Column="3" Margin="5"/>
+            </Grid>
+        </GroupBox>
+    
+        <!-- Invoice Items Section -->
+        <GroupBox Header="Invoice Items" Grid.Row="2" Margin="5">
+            <DataGrid x:Name="InvoiceItemsGrid" AutoGenerateColumns="False" CanUserAddRows="True" BeginningEdit="InvoiceItemsGrid_BeginningEdit">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Item ID" Binding="{Binding ItemId}" IsReadOnly="True" />
+
+                    <!-- Type Column -->
+                    <DataGridTemplateColumn Header="Type">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Type}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox SelectedValue="{Binding Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                      ItemsSource="{x:Static local:TypeValues.AllTypes}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+
+
+                    <!-- Description Column -->
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" />
+                    <DataGridTextColumn Header="Quantity" Binding="{Binding Quantity}" />
+                    <DataGridTextColumn Header="Rate" Binding="{Binding Rate}" />
+
+                    <!-- PartId Column -->
+                    <DataGridTemplateColumn Header="Part ID">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Part.Name}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox
+                ItemsSource="{Binding DataContext.Parts, RelativeSource={RelativeSource AncestorType=Window}}"
+                DisplayMemberPath="Name"
+                SelectedValuePath="ID"
+                SelectedValue="{Binding PartId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                IsEnabled="{Binding IsPartEditable}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                </DataGrid.Columns>
+            </DataGrid>
+
+
+
+        </GroupBox>
+
+        <!-- Totals and Actions -->
+        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5">
+            <TextBlock Text="Subtotal:" VerticalAlignment="Center" Margin="10"/>
+            <TextBox x:Name="SubtotalInput" Width="100" IsReadOnly="True" Margin="5"/>
+
+            <TextBlock Text="Tax:" VerticalAlignment="Center" Margin="10"/>         
+            <TextBox x:Name="TaxInput" Width="100" IsReadOnly="True" Margin="5"/>
+
+            <TextBlock Text="Total:" VerticalAlignment="Center" Margin="10"/>
+            <TextBox x:Name="TotalInput" Width="100" IsReadOnly="True" Margin="5"/>
+
+            <Button x:Name="SaveButton" Content="Save" Width="100" Margin="15,0,0,0" Click="SaveButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

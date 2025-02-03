@@ -1,0 +1,57 @@
+﻿name: "Deploy KTruck"
+
+on: 
+    push: 
+        tags:
+            - "ktruck/v*"
+
+permissions:
+    contents: write
+
+env:
+    PROJECT_PATH: KTruckGui.csproj
+
+jobs:
+    deploy:
+        runs-on: windows-latest
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v2
+            
+            - name: Setup .NET SDK
+              uses: actions/setup-dotnet@v1
+              with: 
+                dotnet-version: 8.0.x
+
+            - name: Install Missing Runtime Packs
+              run: |
+                dotnet workload install microsoft-net-runtime microsoft-windowsdesktop-runtime
+                dotnet --list-runtimes
+
+            - name: Restore Dependencies
+              run: dotnet restore ${{ env.PROJECT_PATH }} --runtime win-x64
+
+            - name: Build the Project
+              run: dotnet build ${{ env.PROJECT_PATH }} -c Release
+
+            - name: Publish the Application
+              run: dotnet publish ${{ env.PROJECT_PATH }} -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+
+            - name: Create GitHub Release
+              uses: actions/create-release@v1 
+              id: create_release
+              env: 
+                GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+              with: 
+                tag_name: ${{ github.ref }}
+                release_name: ${{ github.ref }}
+
+            - name: Upload Release Asset
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: publish/KTruckGui.exe  # ✅ Corrected path
+                asset_name: KTruckGui.exe
+                asset_content_type: application/octet-stream

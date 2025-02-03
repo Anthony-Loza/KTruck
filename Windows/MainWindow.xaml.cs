@@ -16,7 +16,7 @@ namespace KTruckGui
     {
 
         private static readonly string repoOwner = "Anthony-Loza";
-        private static readonly string repoName = "KTruckGuiC";
+        private static readonly string repoName = "KTruck";
         private static readonly string currentVersion = GetCurrentVersion();
         public MainWindow()
         {

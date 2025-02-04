@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using KTruckGui.Models;
-using Microsoft.VisualBasic; // Add this line at the top of your file
+using Microsoft.VisualBasic; 
 
 
 namespace KTruckGui
@@ -26,7 +26,11 @@ namespace KTruckGui
         }
         private static string GetCurrentVersion()
         {
-            return Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "Unknown";
+            string fullVersion = Assembly.GetExecutingAssembly()
+    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "Unknown";
+
+            // Remove commit hash suffix (everything after `+`)
+            return fullVersion.Split('+')[0];
         }
         private async Task CheckForUpdatesAsync()
         {

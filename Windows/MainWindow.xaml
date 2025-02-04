@@ -6,6 +6,8 @@
 
         Title="KTruck" Height="800" Width="1200"
         WindowStartupLocation="CenterScreen">
+    
+    
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="File">
@@ -36,6 +38,23 @@
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Diesel Shop Dashboard" FontSize="24" FontWeight="Bold" 
+                       HorizontalAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2" Margin="10"/>
+
+
+            <StackPanel Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <ProgressBar x:Name="UpdateProgressBar" 
+                             Width="300" 
+                             Height="20" 
+                             Minimum="0" Maximum="100"
+                             Visibility="Collapsed"/>
+                <TextBlock x:Name="UpdateStatusLabel" 
+                           Text="Checking for updates..."
+                           HorizontalAlignment="Center" 
+                           Margin="10"
+                           Visibility="Collapsed"/>
+            </StackPanel>
 
             <!-- Header -->
             <Border x:Name="LeftMain" Grid.Row="1" Grid.Column="0" Margin="5" BorderBrush="Gray" BorderThickness="1" Padding="10">
@@ -81,10 +100,6 @@
                     </StackPanel>
                 </Grid>
             </Border>
-
-            <!-- Header -->
-            <TextBlock Text="Diesel Shop Dashboard" FontSize="24" FontWeight="Bold" 
-                       HorizontalAlignment="Center" Grid.Row="0" Grid.ColumnSpan="2" Margin="10"/>
 
             <!-- Aging Report -->
             <Border Grid.Row="1" Grid.Column="1" Margin="5" BorderBrush="Gray" BorderThickness="1" Padding="10">

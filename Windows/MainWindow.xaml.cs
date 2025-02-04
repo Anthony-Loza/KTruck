@@ -47,8 +47,6 @@ namespace KTruckGui
                 // Extract only the numeric portion (remove 'ktruck/v')
                 string latestVersion = latestVersionTag.Replace("ktruck/v", "").Trim();
 
-                System.Windows.MessageBox.Show($"Latest version: {latestVersion}, Current version: {currentVersion}");
-
                 if (latestVersion != currentVersion)
                 {
                     MessageBoxResult result = System.Windows.MessageBox.Show($"A new version ({latestVersion}) is available. Would you like to update?", "Update Available", MessageBoxButton.YesNo);

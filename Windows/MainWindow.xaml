@@ -93,7 +93,7 @@
                         <TextBlock Text="Upcoming Work" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
                         <ListBox x:Name="UpcomingWorkList">
                             <!-- Example Data -->
-                            <ListBoxItem Content="Job #001 - Filler"/>
+                            <ListBoxItem Content="Job #001 - Tire Change"/>
                             <ListBoxItem Content="Job #002 - Brake Repair"/>
                             <ListBoxItem Content="Job #003 - Engine Diagnostics"/>
                         </ListBox>

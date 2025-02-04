@@ -68,6 +68,11 @@ namespace KTruckGui
         {
             try
             {
+                // Show progress bar and update message
+                UpdateProgressBar.Visibility = Visibility.Visible;
+                UpdateStatusLabel.Visibility = Visibility.Visible;
+                UpdateStatusLabel.Text = "Downloading update...";
+
                 string tempFilePath = Path.Combine(Path.GetTempPath(), "KTruckGui_New.exe");
 
                 using HttpClient client = new HttpClient();
@@ -83,10 +88,21 @@ namespace KTruckGui
                 while ((bytesRead = await httpStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                 {
                     await fileStream.WriteAsync(buffer, 0, bytesRead);
+                    totalRead += bytesRead;
+                    double progress = (double)totalRead / totalBytes * 100;
+
+                    // Update UI
+                    Dispatcher.Invoke(() =>
+                    {
+                        UpdateProgressBar.Value = progress;
+                        UpdateStatusLabel.Text = $"Downloading update... {progress:F2}%";
+                    });
                 }
 
+                // Notify the user
                 System.Windows.MessageBox.Show("Update downloaded. Restarting application...", "Update Successful");
 
+                // Start the update process
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
@@ -101,7 +117,17 @@ namespace KTruckGui
             {
                 System.Windows.MessageBox.Show($"Update failed: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            finally
+            {
+                // Hide progress UI
+                Dispatcher.Invoke(() =>
+                {
+                    UpdateProgressBar.Visibility = Visibility.Collapsed;
+                    UpdateStatusLabel.Visibility = Visibility.Collapsed;
+                });
+            }
         }
+
 
         private void LoadDashboardData()
         {

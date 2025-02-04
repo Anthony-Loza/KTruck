@@ -41,7 +41,9 @@ namespace KTruckGui
                 string latestVersionTag = json.RootElement.GetProperty("tag_name").GetString();
 
                 // Extract only the numeric portion (remove 'ktruck/v')
-                string latestVersion = latestVersionTag.Replace("ktruck/v", "");
+                string latestVersion = latestVersionTag.Replace("ktruck/v", "").Trim();
+
+                System.Windows.MessageBox.Show($"Latest version: {latestVersion}, Current version: {currentVersion}");
 
                 if (latestVersion != currentVersion)
                 {

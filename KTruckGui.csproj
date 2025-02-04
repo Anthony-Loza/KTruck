@@ -13,10 +13,10 @@
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	<ApplicationIcon>Assets\KLogAppLogo.ico</ApplicationIcon>
 
-	  <Version>1.0.03</Version>
-	  <FileVersion>1.0.03</FileVersion>
+	  <Version>1.0.04</Version>
+	  <FileVersion>1.0.04</FileVersion>
 	  <AssemblyVersion>1.0.0.0</AssemblyVersion>
-	  <InformationalVersion>1.0.03</InformationalVersion>
+	  <InformationalVersion>1.0.04</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

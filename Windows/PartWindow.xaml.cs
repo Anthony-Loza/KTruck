@@ -135,10 +135,7 @@ namespace KTruckGui
         // Add the missing event handler
         private void PartsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (PartsDataGrid.SelectedItem is Part selectedPart)
-            {
-                System.Windows.MessageBox.Show($"Selected Part: {selectedPart.Name}, Quantity: {selectedPart.Quantity}");
-            }
+
         }
     }
 }

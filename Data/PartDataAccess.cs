@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Printing.IndexedProperties;
 using KTruckGui.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -292,6 +294,164 @@ namespace KTruckGui.Data
             command.Parameters.AddWithValue("@LastUpdated", part.LastUpdated ?? DateTime.Now);
             command.Parameters.AddWithValue("@Active", part.Active ?? (object)DBNull.Value);
         }
+
+public void AddPurchaseOrderPDF(int partId, byte[] pdfData, string fileName)
+{
+    try
+    {
+        using (var connection = new SqlConnection(connectionString))
+        {
+            string query = @"
+                INSERT INTO PartPurchaseOrders (PartID, PurchaseOrderPDF, Filename, DateAdded)
+                VALUES (@PartID, @PDFData, @Filename, GETDATE())";
+
+            var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@PartID", partId);
+            command.Parameters.AddWithValue("@PDFData", pdfData);
+            command.Parameters.AddWithValue("@Filename", string.IsNullOrEmpty(fileName) ? DBNull.Value : fileName);
+
+            connection.Open();
+            command.ExecuteNonQuery();
+        }
+    }
+    catch (SqlException ex)
+    {
+        throw new Exception($"Failed to upload purchase order PDF. Error: {ex.Message}", ex);
+    }
+}
+
+
+        public List<PartPurchaseOrder> GetPurchaseOrdersForPart(int partId)
+        {
+            var purchaseOrders = new List<PartPurchaseOrder>();
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                SELECT ID, Filename, DateAdded 
+                FROM PartPurchaseOrders 
+                WHERE PartID = @PartID 
+                ORDER BY DateAdded DESC"; // Order by most recent first
+
+                    var command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@PartID", partId);
+
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            purchaseOrders.Add(new PartPurchaseOrder
+                            {
+                                ID = Convert.ToInt32(reader["ID"]),
+                                Filename = reader["Filename"].ToString(),
+                                DateAdded = Convert.ToDateTime(reader["DateAdded"])
+                            });
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception($"Failed to fetch purchase orders for Part ID {partId}: {ex.Message}", ex);
+            }
+
+            return purchaseOrders;
+        }
+
+
+
+        public void DeletePurchaseOrderPDF(int purchaseOrderId)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                const string query = "DELETE FROM PartPurchaseOrders WHERE ID = @ID";
+                var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@ID", purchaseOrderId);
+
+                connection.Open();
+                command.ExecuteNonQuery();
+            }
+        }
+
+
+        public List<string> GetPurchaseOrderFiles(int partId)
+        {
+            var fileList = new List<string>();
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                SELECT Filename, UploadDate FROM PartPurchaseOrders 
+                WHERE PartID = @PartID 
+                ORDER BY UploadDate DESC"; // Order by newest first
+
+                    var command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@PartID", partId);
+
+                    connection.Open();
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string fileName = reader["Filename"].ToString();
+                            fileList.Add(fileName);
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new Exception($"Failed to fetch purchase orders for Part ID {partId}: {ex.Message}", ex);
+            }
+
+            return fileList;
+        }
+
+        public byte[] GetPurchaseOrderPDF(int purchaseOrderId)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                SELECT PurchaseOrderPDF FROM PartPurchaseOrders 
+                WHERE ID = @ID";
+
+                    var command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@ID", purchaseOrderId);
+
+                    connection.Open();
+                    var result = command.ExecuteScalar();
+
+                    return result as byte[]; // Ensure it's cast correctly
+                }
+            }
+            catch (SqlException ex)
+            {
+                LogError($"Failed to fetch purchase order PDF for ID {purchaseOrderId}: {ex.Message}");
+                return null;
+            }
+        }
+
+        private void LogError(string message)
+        {
+            // Log to a file (or use a logging library)
+            string logFile = "error_log.txt";
+            try
+            {
+                File.AppendAllText(logFile, $"{DateTime.Now}: {message}\n");
+            }
+            catch
+            {
+                // If logging fails, there's nothing much we can do
+            }
+        }
+
 
     }
 }

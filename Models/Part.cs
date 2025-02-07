@@ -28,6 +28,7 @@ namespace KTruckGui.Models
         public DateTime? DateAdded { get; set; }
         public DateTime? LastUpdated { get; set; }
         public bool? Active {  get; set; }
+        public List<PartPurchaseOrder> PurchaseOrders { get; set; } = new();
 
 
         public virtual ICollection<InvoiceItem> InvoiceItems { get; set; }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,7 +31,8 @@ namespace KTruckGui
             if (part != null)
             {
                 _part = part;
-                PopulateFields(part); // Populate fields with the selected part's data
+                PopulateFields(part);
+                LoadPurchaseOrders();
             }
         }
 
@@ -142,5 +144,95 @@ namespace KTruckGui
         {
 
         }
+
+        private void UploadPDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (_part == null)
+            {
+                System.Windows.MessageBox.Show("No part selected. Please select a part before uploading.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "PDF Files|*.pdf",
+                Title = "Select a Purchase Order PDF"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                byte[] pdfData = File.ReadAllBytes(openFileDialog.FileName);
+                string fileName = System.IO.Path.GetFileName(openFileDialog.FileName); // Extract file name
+
+                partDataAccess.AddPurchaseOrderPDF(_part.ID, pdfData, fileName);
+                System.Windows.MessageBox.Show("Purchase Order PDF uploaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                LoadPurchaseOrders(); // Refresh list
+            }
+        }
+        private void LoadPurchaseOrders()
+        {
+            try
+            {
+                var purchaseOrders = partDataAccess.GetPurchaseOrdersForPart(_part.ID);
+                PurchaseOrderList.ItemsSource = purchaseOrders; // Store full objects
+                PurchaseOrderList.DisplayMemberPath = "Filename"; // Show filenames only
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to load purchase orders: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+        private void ViewPDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (PurchaseOrderList.SelectedItem is not PartPurchaseOrder selectedOrder)
+            {
+                System.Windows.MessageBox.Show("Please select a purchase order to view.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            byte[] pdfData = partDataAccess.GetPurchaseOrderPDF(selectedOrder.ID);
+
+            if (pdfData == null || pdfData.Length == 0)
+            {
+                System.Windows.MessageBox.Show("Failed to retrieve the PDF file from the database.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string tempFilePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), selectedOrder.Filename);
+            File.WriteAllBytes(tempFilePath, pdfData);
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = tempFilePath,
+                UseShellExecute = true
+            });
+        }
+
+
+        private void DeletePDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (PurchaseOrderList.SelectedItem is PartPurchaseOrder selectedOrder)
+            {
+                try
+                {
+                    partDataAccess.DeletePurchaseOrderPDF(selectedOrder.ID);
+                    System.Windows.MessageBox.Show("Purchase Order PDF deleted successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    LoadPurchaseOrders(); // Refresh list after deletion
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Failed to delete purchase order: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Please select a purchase order to delete.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
     }
 }

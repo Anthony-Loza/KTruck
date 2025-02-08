@@ -31,6 +31,7 @@ namespace KTruckGui.Models
         public required string Type { get; set; }
         public required string FName { get; set; }
         public required string LName { get; set; }
+        public string Name => $"{FName} {LName}";
         public required string Number { get; set; }
         public required string Email { get; set; }
         public required string Address { get; set; }

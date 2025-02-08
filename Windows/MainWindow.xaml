@@ -81,8 +81,7 @@
                         <TextBlock x:Name="NewCustomerLink" Margin="5">
         <Hyperlink Click="NewCustomer_Click">New Customer</Hyperlink>
                         </TextBlock>
-                        <Button Content="Create New Work Order" 
-                Click="CreateWorkOrder_Click" Width="143" />
+
                     </StackPanel>
 
 

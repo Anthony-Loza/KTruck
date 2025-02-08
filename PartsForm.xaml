@@ -87,7 +87,7 @@
 
 
 
-                <ListBox x:Name="PurchaseOrderList" Width="300" Margin="382,4,-482,147" Grid.Column="3"/>
+                <ListBox x:Name="PurchaseOrderList" Width="300" Margin="382,4,-482,-121" Grid.Column="3"/>
 
 
                 <TextBlock Text="Status:" Grid.Column="2" VerticalAlignment="Top" Margin="0,108,0,0"/>
@@ -100,8 +100,8 @@
             </Grid>
 
             <!-- GroupBox Section -->
-            <GroupBox Header="Statistics" Grid.Row="2" Margin="0,163,-17,0">
-                <Grid Margin="10">
+            <GroupBox Header="Statistics" Grid.Row="2" Margin="0,163,327,0">
+                <Grid Margin="10,0,324,0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>

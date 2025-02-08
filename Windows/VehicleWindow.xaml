@@ -34,7 +34,7 @@
 
                 <!-- Ensure Unique Control Names -->
                 <TextBlock Text="Owner:" Grid.Row="0" Grid.Column="0" Margin="5"/>
-                <ComboBox x:Name="OwnerComboBox" Grid.Row="0" Grid.Column="1" Margin="5" SelectionChanged="OwnerComboBox_SelectionChanged"/>
+                <ComboBox x:Name="OwnerComboBox" Grid.Row="0" Grid.Column="1" Margin="5" DisplayMemberPath="Name" SelectedValuePath="Id" SelectionChanged="OwnerComboBox_SelectionChanged"/>
 
                 <TextBlock Text="Make:" Grid.Row="1" Grid.Column="0" Margin="5"/>
                 <TextBox x:Name="MakeTextBox" Grid.Row="1" Grid.Column="1" Margin="5" TextChanged="MakeTextBox_TextChanged"/>

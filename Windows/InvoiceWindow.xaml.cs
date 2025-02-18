@@ -10,6 +10,7 @@ using System.Windows.Shapes;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 
 namespace KTruckGui
@@ -174,6 +175,37 @@ namespace KTruckGui
             {
                 System.Windows.MessageBox.Show($"Failed to update invoice summary. Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Retrieve search criteria from the UI
+            string searchText = SearchTextBox.Text.Trim();
+            string selectedFilter = (FilterComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString();
+
+            // Load all invoices from the data access layer
+            var invoices = invoiceDataAccess.GetInvoices();
+
+            // Filter invoices based on search text (e.g., matching Id, Description, or BillTo)
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                invoices = invoices.Where(i =>
+                    (i.Id != null && i.Id.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (i.Description != null && i.Description.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                    (i.BillTo != null && i.BillTo.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) >= 0)
+                ).ToList();
+            }
+
+            // Apply status filter if one is selected and it's not "All"
+            if (!string.IsNullOrEmpty(selectedFilter) && !selectedFilter.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                invoices = invoices.Where(i =>
+                    i.Status != null && i.Status.Equals(selectedFilter, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            // Update the DataGrid with the filtered list
+            InvoiceDataGrid.ItemsSource = invoices;
         }
 
 

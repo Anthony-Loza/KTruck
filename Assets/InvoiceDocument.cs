@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,12 +11,12 @@ using QuestPDF.Infrastructure;
 using QuestPDF.Previewer;
 
 namespace KTruckGui.Assets
-{   
+{
     internal class InvoiceDocument : IDocument
     {
         public Invoice Model { get; }
         private readonly Customer FromCustomer;
-        private readonly Customer ForCustomer;        
+        private readonly Customer ForCustomer;
 
         public InvoiceDocument(Invoice model, Customer fromCustomer, Customer forCustomer)
         {
@@ -32,15 +30,23 @@ namespace KTruckGui.Assets
 
         public void Compose(IDocumentContainer container)
         {
-            container
-                .Page(page =>
-                {
-                    page.Margin(50);
+            container.Page(page =>
+            {
+                page.Margin(40);
 
-                    page.Header().Element(ComposeHeader);
-                    page.Content().Element(ComposeContent);
-                    page.Footer().Height(50).Background(Colors.Grey.Lighten1).Text("Your business is appreciated!").AlignCenter();
-                });
+                page.Header().Element(ComposeHeader);
+                page.Content().Element(ComposeContent);
+                page.Footer().Height(50)
+                           .Background(Colors.Blue.Lighten4)
+                           .AlignCenter()
+                           .AlignMiddle()
+                           .Text(text =>
+                           {
+                               text.Span("Thank you for your business!")
+                                    .FontSize(12)
+                                    .FontColor(Colors.Blue.Medium);
+                           });
+            });
         }
 
         private byte[] GetEmbeddedResource(string resourceName)
@@ -61,37 +67,44 @@ namespace KTruckGui.Assets
 
         private void ComposeHeader(IContainer container)
         {
-            container.Row(row =>
-            {
-                // Add the title and invoice information to the left
-                row.RelativeItem().Column(column =>
-                {
-                    column.Item()
-                        .Text($"Invoice #{Model.Id.Substring(Model.Id.Length - 12)}")
-                        .FontSize(20).SemiBold().FontColor(Colors.Blue.Medium);
+            container.PaddingVertical(10)
+                     .Background(Colors.Grey.Lighten2)
+                     .BorderBottom(1)
+                     .BorderColor(Colors.Grey.Medium)
+                     .Row(row =>
+                     {
+                         // Left side: Invoice info
+                         row.RelativeItem().Column(column =>
+                         {
+                             column.Item().Text(text =>
+                             {
+                                 text.Span($"Invoice #{Model.Id.Substring(Model.Id.Length - 12)}")
+                                      .FontSize(22)
+                                      .Bold()
+                                      .FontColor(Colors.Blue.Medium);
+                             });
+                             column.Item().Text(text =>
+                             {
+                                 text.Span("Issue Date: ").SemiBold().FontSize(10);
+                                 text.Span($"{Model.DateCreated:d}").FontSize(10);
+                             });
+                             column.Item().Text(text =>
+                             {
+                                 text.Span("Due Date: ").SemiBold().FontSize(10);
+                                 text.Span($"{Model.DueDate:d}").FontSize(10);
+                             });
+                         });
 
-                    column.Item().Text(text =>
-                    {
-                        text.Span("Issue date: ").SemiBold();
-                        text.Span($"{Model.DateCreated:d}");
-                    });
-
-                    column.Item().Text(text =>
-                    {
-                        text.Span("Due date: ").SemiBold();
-                        text.Span($"{Model.DueDate:d}");
-                    });
-                });
-
-                // Get the embedded logo
-                string resourceName = "KTruckGui.Assets.KLogApp.png"; // Namespace + folder + file name
-                var logoData = GetEmbeddedResource(resourceName);
-
-                // Add the logo to the right
-                row.ConstantItem(100).Height(50).AlignRight().AlignMiddle().Image(logoData, ImageScaling.FitArea);
-            });
+                         // Right side: Logo
+                         string resourceName = "KTruckGui.Assets.KLogApp.png";
+                         var logoData = GetEmbeddedResource(resourceName);
+                         row.ConstantItem(100)
+                            .Height(50)
+                            .AlignRight()
+                            .AlignMiddle()
+                            .Image(logoData, ImageScaling.FitArea);
+                     });
         }
-
 
         private void ComposeContent(IContainer container)
         {
@@ -101,7 +114,7 @@ namespace KTruckGui.Assets
             {
                 column.Spacing(25);
 
-                // Add customer details
+                // Customer addresses
                 column.Item().Row(row =>
                 {
                     row.RelativeItem().Component(new AddressComponent("From", FromCustomer));
@@ -109,66 +122,89 @@ namespace KTruckGui.Assets
                     row.RelativeItem().Component(new AddressComponent("For", ForCustomer));
                 });
 
-                // Add the table for invoice items
+                // Invoice Items Table
                 column.Item().Table(table =>
                 {
                     // Define table columns
                     table.ColumnsDefinition(columns =>
                     {
                         columns.ConstantColumn(25); // Serial number column
-                        columns.RelativeColumn(3); // Item type column
-                        columns.RelativeColumn();  // Quantity column
-                        columns.RelativeColumn();  // Rate column
-                        columns.RelativeColumn();  // Total column
+                        columns.RelativeColumn(3);  // Item type column
+                        columns.RelativeColumn();   // Quantity column
+                        columns.RelativeColumn();   // Rate column
+                        columns.RelativeColumn();   // Total column
                     });
 
-                    // Define the table header
+                    // Table header with background and bold text
                     table.Header(header =>
                     {
-                        header.Cell().Element(CellStyle).Text("#");
-                        header.Cell().Element(CellStyle).Text("Item");
-                        header.Cell().Element(CellStyle).AlignRight().Text("Qty");
-                        header.Cell().Element(CellStyle).AlignRight().Text("Rate");
-                        header.Cell().Element(CellStyle).AlignRight().Text("Total");
+                        header.Cell().Element(HeaderCellStyle).Text(text => text.Span("#"));
+                        header.Cell().Element(HeaderCellStyle).Text(text => text.Span("Item"));
+                        header.Cell().Element(HeaderCellStyle).AlignRight().Text(text => text.Span("Qty"));
+                        header.Cell().Element(HeaderCellStyle).AlignRight().Text(text => text.Span("Rate"));
+                        header.Cell().Element(HeaderCellStyle).AlignRight().Text(text => text.Span("Total"));
 
-                        static IContainer CellStyle(IContainer container)
+                        static IContainer HeaderCellStyle(IContainer container)
                         {
-                            return container.DefaultTextStyle(x => x.SemiBold())
+                            return container.DefaultTextStyle(x => x.Bold().FontColor(Colors.White))
                                             .PaddingVertical(5)
+                                            .PaddingHorizontal(2)
+                                            .Background(Colors.Grey.Medium)
                                             .BorderBottom(1)
                                             .BorderColor(Colors.Black);
                         }
                     });
 
+                    // Data rows with alternating background colors
                     int index = 1;
-
-                    // Add data rows for each invoice item
                     foreach (var item in Model.InvoiceItems)
                     {
                         var itemTotal = item.Total ?? (item.Rate * item.Quantity);
-                        var itemTax = item.Type.ToLower() == "part" ? itemTotal * taxRate : 0m;
+                        var rowBackground = (index % 2 == 0) ? Colors.Grey.Lighten5 : Colors.White;
 
-                        table.Cell().Element(CellStyle).Text(index++.ToString()); // Serial number
-                        table.Cell().Element(CellStyle).Text(item.Type); // Item type
-                        table.Cell().Element(CellStyle).AlignRight().Text(item.Quantity.ToString()); // Quantity
-                        table.Cell().Element(CellStyle).AlignRight().Text($"${item.Rate:F2}"); // Rate
-                        table.Cell().Element(CellStyle).AlignRight().Text($"${itemTotal:F2}"); // Total
+                        table.Cell().Element(cell => DataCellStyle(cell, rowBackground))
+                            .Text(text => text.Span(index.ToString()));
+                        table.Cell().Element(cell => DataCellStyle(cell, rowBackground))
+                            .Text(text => text.Span(item.Type));
+                        table.Cell().Element(cell => DataCellStyle(cell, rowBackground).AlignRight())
+                            .Text(text => text.Span(item.Quantity.ToString()));
+                        table.Cell().Element(cell => DataCellStyle(cell, rowBackground).AlignRight())
+                            .Text(text => text.Span($"${item.Rate:F2}"));
+                        table.Cell().Element(cell => DataCellStyle(cell, rowBackground).AlignRight())
+                            .Text(text => text.Span($"${itemTotal:F2}"));
+                        index++;
+                    }
 
-                        static IContainer CellStyle(IContainer container)
-                        {
-                            return container.BorderBottom(1)
-                                            .BorderColor(Colors.Grey.Lighten2)
-                                            .PaddingVertical(5);
-                        }
+                    static IContainer DataCellStyle(IContainer container, string backgroundColor)
+                    {
+                        return container.Background(backgroundColor)
+                                        .PaddingVertical(5)
+                                        .PaddingHorizontal(2)
+                                        .BorderBottom(1)
+                                        .BorderColor(Colors.Grey.Lighten2);
                     }
                 });
 
-                // Calculate subtotal, tax, and grand total
-                var grandTotal = Model.InvoiceItems.Sum(x => x.Total ?? (x.Rate * x.Quantity));
-                column.Item().AlignRight().Text($"Grand total: ${grandTotal:F2}").FontSize(14).SemiBold();
+                // Totals Summary
+                var subtotal = Model.InvoiceItems.Sum(x => x.Rate * x.Quantity);
+                var taxTotal = Model.InvoiceItems.Sum(x => x.Type.ToLower() == "part" ? (x.Rate * x.Quantity) * taxRate : 0m);
+                var grandTotal = subtotal + taxTotal;
+
+                column.Item().AlignRight().Column(col =>
+                {
+                    col.Spacing(2);
+                    col.Item().Text(text =>
+                        text.Span($"Subtotal: ${subtotal:F2}").FontSize(12));
+                    col.Item().Text(text =>
+                        text.Span($"Tax (8.25%): ${taxTotal:F2}").FontSize(12));
+                    col.Item().Text(text =>
+                        text.Span($"Grand Total: ${grandTotal:F2}")
+                            .FontSize(14)
+                            .SemiBold()
+                            .FontColor(Colors.Blue.Darken2));
+                });
             });
         }
-
 
         public void Preview()
         {

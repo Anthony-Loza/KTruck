@@ -20,16 +20,15 @@
             <assets:ReloadButton ReloadClicked="OnReloadButtonClicked" Height="55" />
         </StackPanel>
 
-        <!-- Summary -->
         <!-- Invoice List -->
         <DataGrid x:Name="InvoiceDataGrid"
-          ItemsSource="{Binding Invoices}"
-          SelectedItem="{Binding SelectedInvoice, Mode=TwoWay}"
-          AutoGenerateColumns="False"
-          SelectionChanged="InvoiceDataGrid_SelectionChanged"
-          IsReadOnly="True"
-          SelectionMode="Single"
-          Margin="10,10,65,10">
+                  ItemsSource="{Binding Invoices}"
+                  SelectedItem="{Binding SelectedInvoice, Mode=TwoWay}"
+                  AutoGenerateColumns="False"
+                  SelectionChanged="InvoiceDataGrid_SelectionChanged"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  Margin="10,10,65,10">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Invoice ID" Binding="{Binding Id}" Width="150" />
                 <DataGridTextColumn Header="Bill To (Customer ID)" Binding="{Binding BillTo}" Width="150" />
@@ -39,42 +38,67 @@
             </DataGrid.Columns>
         </DataGrid>
 
-
         <!-- Invoice Details Form -->
-        <StackPanel Grid.Row="1" Margin="10,10,10,9" Grid.RowSpan="2">
-            <Label Content="Customer:"/>
-            <ComboBox x:Name="CustomerComboBox" 
-          ItemsSource="{Binding Customers}"
-          DisplayMemberPath="FullName"
-          SelectedValuePath="Id"
-          SelectedValue="{Binding SelectedInvoice.BillTo, Mode=TwoWay}"
-          SelectionChanged="CustomerComboBox_SelectionChanged"
-                      IsEnabled="{Binding IsEditable}"/>
-            <Label Content="Status:"/>
-            <ComboBox x:Name="StatusComboBox"
-          SelectedValue="{Binding SelectedInvoice.Status, Mode=TwoWay}"
-          SelectionChanged="StatusComboBox_SelectionChanged"
-                      IsEnabled="{Binding IsEditable}"
-          Width="1579">
+        <Grid Grid.Row="1" Margin="10" Grid.RowSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Customer -->
+                <RowDefinition Height="Auto"/>
+                <!-- Status -->
+                <RowDefinition Height="Auto"/>
+                <!-- Description -->
+                <RowDefinition Height="*"/>
+                <!-- Items DataGrid -->
+                <RowDefinition Height="Auto"/>
+                <!-- Totals -->
+                <RowDefinition Height="Auto"/>
+                <!-- Item Actions -->
+                <RowDefinition Height="Auto"/>
+                <!-- Invoice Actions -->
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <!-- Labels -->
+                <ColumnDefinition Width="*"/>
+                <!-- Controls -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Customer -->
+            <Label Content="Customer:" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="CustomerComboBox" Grid.Row="0" Grid.Column="1" Margin="5"
+                    ItemsSource="{Binding Customers}"
+                    DisplayMemberPath="FullName"
+                    SelectedValuePath="Id"
+                    SelectedValue="{Binding SelectedInvoice.BillTo, Mode=TwoWay}"
+                    IsEnabled="{Binding IsEditable}" />
+
+            <!-- Status -->
+            <Label Content="Status:" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <ComboBox x:Name="StatusComboBox" Grid.Row="1" Grid.Column="1" Margin="5"
+                    SelectedValue="{Binding SelectedInvoice.Status, Mode=TwoWay}"
+                    IsEnabled="{Binding IsEditable}">
                 <ComboBox.Items>
-                    <ComboBoxItem>estimate</ComboBoxItem>
-                    <ComboBoxItem>in progress</ComboBoxItem>
-                    <ComboBoxItem>finalized</ComboBoxItem>
+                    <ComboBoxItem Content="Estimate"/>
+                    <ComboBoxItem Content="Work In Progress"/>
+                    <ComboBoxItem Content="Finalized"/>
                 </ComboBox.Items>
             </ComboBox>
 
+            <!-- Description -->
+            <Label Content="Description:" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center"/>
+            <TextBox x:Name="DescriptionTextBox" Grid.Row="2" Grid.Column="1" Margin="5"
+                   IsEnabled="{Binding IsEditable}"
+                   Text="{Binding SelectedInvoice.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                   TextChanged="DescriptionTextBox_TextChanged"/>
 
-
-            <Label Content="Description:"/>
-            <TextBox x:Name="DescriptionTextBox" IsEnabled="{Binding Path=IsEditable}"
-         Text="{Binding SelectedInvoice.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-         TextChanged="DescriptionTextBox_TextChanged"
-                     />
-
-            <Label Content="Items:"/>
-            <DataGrid x:Name="ItemsDataGrid" AutoGenerateColumns="False" SelectionChanged="ItemsDataGrid_SelectionChanged" IsReadOnly="{Binding IsReadOnly}" >
+            <!-- Items DataGrid -->
+            <Label Content="Items:" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Top"/>
+            <DataGrid x:Name="ItemsDataGrid" Grid.Row="3" Grid.Column="1" Margin="5"
+                    AutoGenerateColumns="False"
+                    SelectionChanged="ItemsDataGrid_SelectionChanged"
+                    IsReadOnly="{Binding IsReadOnly}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Item ID" Binding="{Binding ItemId}" IsReadOnly="True"  />
+                    <DataGridTextColumn Header="Item ID" Binding="{Binding ItemId}" IsReadOnly="True"/>
                     <DataGridTemplateColumn Header="Type">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -83,27 +107,24 @@
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <ComboBox
-                ItemsSource="{x:Static local:TypeValues.AllTypes}"
-                SelectedValue="{Binding Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <ComboBox ItemsSource="{x:Static local:TypeValues.AllTypes}"
+                              SelectedValue="{Binding Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
-
                     <DataGridTemplateColumn Header="Part ID">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding PartId}" />
-                            </DataTemplate> 
+                            </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                         <DataGridTemplateColumn.CellEditingTemplate>
                             <DataTemplate>
-                                <ComboBox
-                        ItemsSource="{Binding DataContext.Parts, RelativeSource={RelativeSource AncestorType=Window}}"
-                        DisplayMemberPath="Name"
-                        SelectedValuePath="Id"
-                        SelectedValue="{Binding PartId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        IsEnabled="{Binding IsPartEditable}" />
+                                <ComboBox ItemsSource="{Binding DataContext.Parts, RelativeSource={RelativeSource AncestorType=Window}}"
+                              DisplayMemberPath="Name"
+                              SelectedValuePath="Id"
+                              SelectedValue="{Binding PartId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              IsEnabled="{Binding IsPartEditable}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
@@ -115,27 +136,29 @@
                 </DataGrid.Columns>
             </DataGrid>
 
+            <!-- Totals Row -->
+            <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+                <Label Content="Subtotal:" Margin="5,0"/>
+                <TextBlock x:Name="SubtotalTextBlock" Margin="5,0"/>
+                <Label Content="Tax:" Margin="5,0"/>
+                <TextBlock x:Name="TaxTextBlock" Margin="5,0"/>
+                <Label Content="Total:" Margin="5,0"/>
+                <TextBlock x:Name="TotalTextBlock" Margin="5,0"/>
+            </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Width="298" Height="30">
-                <Label Content="Subtotal:"/>
-                <TextBlock x:Name="SubtotalTextBlock"/>
-                <Label Content="Tax:"/>
-                <TextBlock x:Name="TaxTextBlock"/>
-                <Label Content="Total:"/>
-                <TextBlock x:Name="TotalTextBlock"/>
+            <!-- Item Actions -->
+            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+                <Button Content="Save Item" Width="100" Click="SaveItem_Click" Margin="5,0"/>
+                <Button Content="Delete Item" Width="100" Click="DeleteItem_Click" Margin="5,0"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Width="200" Margin="0,0,0,10">
-                <Button Content="Save Item" Width="100" Click="SaveItem_Click"/>
-                <Button Content="Delete Item" Width="100" Click="DeleteItem_Click"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Width="401">
-                <Button Content="Create Invoice" Width="100" Click="CreateInvoice_Click"/>
-                <Button Content="Delete Invoice" Width="100" Click="DeleteInvoice_Click"/>
-                <Button Content="Estimate PDF" Width="100" Click="GenerateEstimatePDF_Click"/>
-                <Button Content="Invoice PDF" Width="100" Click="GenerateInvoicePDF_Click"/>
-            </StackPanel>
-        </StackPanel>
-        
 
+            <!-- Invoice Actions -->
+            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
+                <Button Content="Create Invoice" Width="100" Click="CreateInvoice_Click" Margin="5,0"/>
+                <Button Content="Delete Invoice" Width="100" Click="DeleteInvoice_Click" Margin="5,0"/>
+                <Button Content="Estimate PDF" Width="100" Click="GenerateEstimatePDF_Click" Margin="5,0"/>
+                <Button Content="Invoice PDF" Width="100" Click="GenerateInvoicePDF_Click" Margin="5,0"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

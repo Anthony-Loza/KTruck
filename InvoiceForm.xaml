@@ -1,11 +1,14 @@
-﻿<Window x:Class="KTruckGui.InvoiceForm"
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="KTruckGui.InvoiceForm"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KTruckGui"
         xmlns:Assets="clr-namespace:KTruckGui.Assets"
-        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib" 
+        xmlns:models="clr-namespace:KTruckGui.Models" 
+        d:DataContext="{d:DesignInstance Type=models:InvoiceItem}"
         mc:Ignorable="d"
         Title="InvoiceForm" Height="800" Width="1200"
         WindowStartupLocation="CenterScreen">
@@ -65,7 +68,7 @@
                 <DatePicker x:Name="DueDateInput" Grid.Row="2" Grid.Column="3" Margin="5"/>
             </Grid>
         </GroupBox>
-    
+
         <!-- Invoice Items Section -->
         <GroupBox Header="Invoice Items" Grid.Row="2" Margin="5">
             <DataGrid x:Name="InvoiceItemsGrid" AutoGenerateColumns="False" CanUserAddRows="True" BeginningEdit="InvoiceItemsGrid_BeginningEdit">
@@ -125,7 +128,7 @@
             <TextBlock Text="Subtotal:" VerticalAlignment="Center" Margin="10"/>
             <TextBox x:Name="SubtotalInput" Width="100" IsReadOnly="True" Margin="5"/>
 
-            <TextBlock Text="Tax:" VerticalAlignment="Center" Margin="10"/>         
+            <TextBlock Text="Tax:" VerticalAlignment="Center" Margin="10"/>
             <TextBox x:Name="TaxInput" Width="100" IsReadOnly="True" Margin="5"/>
 
             <TextBlock Text="Total:" VerticalAlignment="Center" Margin="10"/>

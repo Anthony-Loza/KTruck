@@ -1,18 +1,11 @@
-﻿// VehicleDataAccess.cs
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;  // Updated to use Microsoft.Data.SqlClient
-using Microsoft.Extensions.Configuration;
-
+using Microsoft.Data.SqlClient;
 using System.Windows;
 using KTruckGui.Models;
 
 namespace KTruckGui.Data
-
 {
-    using VehicleModel = KTruckGui.Models.Vehicle;
-
     public class VehicleDataAccess
     {
         private readonly string? connectionString;
@@ -28,9 +21,9 @@ namespace KTruckGui.Data
             }
         }
 
-        public List<VehicleModel> GetVehicle()
+        public List<Vehicle> GetAllVehicles()
         {
-            List<VehicleModel> vehicle = new List<VehicleModel>();
+            List<Vehicle> vehicles = new List<Vehicle>();
 
             try
             {
@@ -46,20 +39,20 @@ namespace KTruckGui.Data
 
                     while (reader.Read())
                     {
-                        var vehicles = new VehicleModel
+                        var vehicle = new Vehicle
                         {
-                            Id = reader.IsDBNull(reader.GetOrdinal("Id")) ? string.Empty : reader.GetString(reader.GetOrdinal("Id")),
-                            AssignmentTo = reader.IsDBNull(reader.GetOrdinal("AssignmentTo")) ? string.Empty : reader.GetString(reader.GetOrdinal("AssignmentTo")),
-                            Make = reader.IsDBNull(reader.GetOrdinal("Make")) ? string.Empty : reader.GetString(reader.GetOrdinal("Make")),
-                            Model = reader.IsDBNull(reader.GetOrdinal("Model")) ? string.Empty : reader.GetString(reader.GetOrdinal("Model")),
-                            Year = reader.IsDBNull(reader.GetOrdinal("Year")) ? 0 : reader.GetInt32(reader.GetOrdinal("Year")),
-                            LicensePlate = reader.IsDBNull(reader.GetOrdinal("LicensePlate")) ? string.Empty : reader.GetString(reader.GetOrdinal("LicensePlate")),
-                            Vin = reader.IsDBNull(reader.GetOrdinal("Vin")) ? string.Empty : reader.GetString(reader.GetOrdinal("Vin")),
-                            Odometer = reader.IsDBNull(reader.GetOrdinal("Odometer")) ? 0 : reader.GetDecimal(reader.GetOrdinal("Odometer")),
-                            Active = reader.IsDBNull(reader.GetOrdinal("Vin")) 
-
+                            // Use safe methods to read from reader
+                            Id = reader.GetSafeString("Id"),
+                            AssignmentTo = reader.GetSafeString("AssignmentTo"),
+                            Make = reader.GetSafeString("Make"),
+                            Model = reader.GetSafeString("Model"),
+                            Year = reader.GetSafeInt32("Year"),
+                            LicensePlate = reader.GetSafeString("LicensePlate"),
+                            Vin = reader.GetSafeString("VIN"),
+                            Odometer = reader.GetSafeDecimal("Odometer"),
+                            Active = reader.GetSafeBool("Active")
                         };
-                        vehicle.Add(vehicles);
+                        vehicles.Add(vehicle);
                     }
                 }
             }
@@ -68,7 +61,7 @@ namespace KTruckGui.Data
                 System.Windows.MessageBox.Show($"Error accessing database: {ex.Message}", "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            return vehicle;
+            return vehicles;
         }
 
         public void DeleteVehicle(string vehicleId)
@@ -91,23 +84,23 @@ namespace KTruckGui.Data
             }
         }
 
-        public void SaveVehicle(Vehicle vehicle)
+        public void AddVehicle(Vehicle vehicle)
         {
             using (var connection = new SqlConnection(connectionString))
             {
-                string query = "INSERT INTO Vehicle (AssignmentTo, Make, Model, Year, LicensePlate, Odometer, Vin, Active) VALUES (@AssignmentTo, @Make, @Model, @Year, @LicensePlate, @Odometer, @Vin, @Active)";
+                string query = @"
+                    INSERT INTO Vehicle (AssignmentTo, Make, Model, Year, LicensePlate, VIN, Odometer, Active) 
+                    VALUES (@AssignmentTo, @Make, @Model, @Year, @LicensePlate, @VIN, @Odometer, @Active)";
                 var command = new SqlCommand(query, connection);
 
-                command.Parameters.AddWithValue("@AssignmentTo", vehicle.AssignmentTo); // Ensure the ID is included
-                command.Parameters.AddWithValue("@Make", vehicle.Make);
-                command.Parameters.AddWithValue("@Model", vehicle.Model);
+                command.Parameters.AddWithValue("@AssignmentTo", (object)vehicle.AssignmentTo ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Make", (object)vehicle.Make ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Model", (object)vehicle.Model ?? DBNull.Value);
                 command.Parameters.AddWithValue("@Year", vehicle.Year);
-                command.Parameters.AddWithValue("@LicensePlate", vehicle.LicensePlate);
-                command.Parameters.AddWithValue("@Odometer", vehicle.Odometer);
-                command.Parameters.AddWithValue("@Vin", vehicle.Vin);
+                command.Parameters.AddWithValue("@LicensePlate", (object)vehicle.LicensePlate ?? DBNull.Value);
+                command.Parameters.AddWithValue("@VIN", (object)vehicle.Vin ?? DBNull.Value);
+                command.Parameters.AddWithValue("@Odometer", (object)vehicle.Odometer ?? DBNull.Value);
                 command.Parameters.AddWithValue("@Active", vehicle.Active);
-
-
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -120,19 +113,27 @@ namespace KTruckGui.Data
             {
                 using (var connection = new SqlConnection(connectionString))
                 {
-                    string query = "UPDATE Vehicle " +
-                                   "SET AssignmentTo = @AssignmentTo, Make = @Make, Model = @Model, Year = @Year, LicensePlate = @LicensePlate,Odometer = @Odometer, Vin = @Vin, Active = @Active" +
-                                   "WHERE Id = @Id";
+                    string query = @"
+                        UPDATE Vehicle 
+                        SET AssignmentTo = @AssignmentTo, 
+                            Make = @Make, 
+                            Model = @Model, 
+                            Year = @Year, 
+                            LicensePlate = @LicensePlate,
+                            VIN = @VIN, 
+                            Odometer = @Odometer, 
+                            Active = @Active
+                        WHERE Id = @Id";
                     var command = new SqlCommand(query, connection);
 
                     command.Parameters.AddWithValue("@Id", vehicle.Id);
-                    command.Parameters.AddWithValue("@AssignmentTo", vehicle.AssignmentTo);
-                    command.Parameters.AddWithValue("@Make", vehicle.Make);
-                    command.Parameters.AddWithValue("@Model", vehicle.Model);
+                    command.Parameters.AddWithValue("@AssignmentTo", (object)vehicle.AssignmentTo ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@Make", (object)vehicle.Make ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@Model", (object)vehicle.Model ?? DBNull.Value);
                     command.Parameters.AddWithValue("@Year", vehicle.Year);
-                    command.Parameters.AddWithValue("@LicensePlate", vehicle.LicensePlate);
-                    command.Parameters.AddWithValue("@Odometer", vehicle.Odometer);
-                    command.Parameters.AddWithValue("@Vin", vehicle.Vin);
+                    command.Parameters.AddWithValue("@LicensePlate", (object)vehicle.LicensePlate ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@VIN", (object)vehicle.Vin ?? DBNull.Value);
+                    command.Parameters.AddWithValue("@Odometer", (object)vehicle.Odometer ?? DBNull.Value);
                     command.Parameters.AddWithValue("@Active", vehicle.Active);
 
                     connection.Open();
@@ -141,12 +142,44 @@ namespace KTruckGui.Data
             }
             catch (SqlException ex)
             {
-                throw new Exception($"Error Updating vehicle");
-
+                throw new Exception($"Error updating vehicle: {ex.Message}");
             }
+        }
+    }
 
+    // Extension methods for SqlDataReader to safely handle null values
+    public static class SqlDataReaderExtensions
+    {
+        public static string GetSafeString(this SqlDataReader reader, string columnName)
+        {
+            int ordinal = reader.GetOrdinal(columnName);
+            return reader.IsDBNull(ordinal) ? string.Empty : reader.GetString(ordinal);
         }
 
+        public static int GetSafeInt32(this SqlDataReader reader, string columnName)
+        {
+            int ordinal = reader.GetOrdinal(columnName);
+            return reader.IsDBNull(ordinal) ? 0 : reader.GetInt32(ordinal);
+        }
 
+        public static decimal GetSafeDecimal(this SqlDataReader reader, string columnName)
+        {
+            int ordinal = reader.GetOrdinal(columnName);
+            return reader.IsDBNull(ordinal) ? 0 : reader.GetDecimal(ordinal);
+        }
+
+        public static bool GetSafeBool(this SqlDataReader reader, string columnName)
+        {
+            int ordinal;
+            try
+            {
+                ordinal = reader.GetOrdinal(columnName);
+            }
+            catch
+            {
+                return false;
+            }
+            return reader.IsDBNull(ordinal) ? false : reader.GetBoolean(ordinal);
+        }
     }
 }

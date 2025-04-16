@@ -1,0 +1,33 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Font Sizes -->
+    <sys:Double x:Key="FontSizeSmall" xmlns:sys="clr-namespace:System;assembly=mscorlib">12</sys:Double>
+    <sys:Double x:Key="FontSizeNormal" xmlns:sys="clr-namespace:System;assembly=mscorlib">14</sys:Double>
+    <sys:Double x:Key="FontSizeMedium" xmlns:sys="clr-namespace:System;assembly=mscorlib">16</sys:Double>
+    <sys:Double x:Key="FontSizeLarge" xmlns:sys="clr-namespace:System;assembly=mscorlib">18</sys:Double>
+    <sys:Double x:Key="FontSizeHeaderSmall" xmlns:sys="clr-namespace:System;assembly=mscorlib">20</sys:Double>
+    <sys:Double x:Key="FontSizeHeaderMedium" xmlns:sys="clr-namespace:System;assembly=mscorlib">24</sys:Double>
+    <sys:Double x:Key="FontSizeHeaderLarge" xmlns:sys="clr-namespace:System;assembly=mscorlib">28</sys:Double>
+
+    <!-- Margins and Padding -->
+    <Thickness x:Key="MarginSmall">4</Thickness>
+    <Thickness x:Key="MarginNormal">8</Thickness>
+    <Thickness x:Key="MarginMedium">16</Thickness>
+    <Thickness x:Key="MarginLarge">20</Thickness>
+
+    <Thickness x:Key="PaddingSmall">4</Thickness>
+    <Thickness x:Key="PaddingNormal">8</Thickness>
+    <Thickness x:Key="PaddingMedium">16</Thickness>
+    <Thickness x:Key="PaddingLarge">20</Thickness>
+
+    <!-- Control Sizes -->
+    <sys:Double x:Key="ControlHeightSmall" xmlns:sys="clr-namespace:System;assembly=mscorlib">25</sys:Double>
+    <sys:Double x:Key="ControlHeightNormal" xmlns:sys="clr-namespace:System;assembly=mscorlib">35</sys:Double>
+    <sys:Double x:Key="ControlHeightLarge" xmlns:sys="clr-namespace:System;assembly=mscorlib">45</sys:Double>
+
+    <!-- Corner Radius -->
+    <CornerRadius x:Key="CornerRadiusSmall">3</CornerRadius>
+    <CornerRadius x:Key="CornerRadiusNormal">4</CornerRadius>
+    <CornerRadius x:Key="CornerRadiusLarge">8</CornerRadius>
+    <CornerRadius x:Key="CornerRadiusPill">20</CornerRadius>
+</ResourceDictionary>

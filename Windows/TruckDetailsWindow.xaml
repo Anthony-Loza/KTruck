@@ -1,0 +1,168 @@
+﻿<Window x:Class="KTruckGui.TruckDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:KTruckGui"
+        mc:Ignorable="d"
+        Title="Truck Details" Height="700" Width="1000"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#3498db" Padding="20,10">
+            <TextBlock Text="Truck Details" FontSize="24" Foreground="White" FontWeight="Bold"/>
+        </Border>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Column: Basic Information -->
+                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                    <GroupBox Header="Basic Information" Padding="10" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Truck ID -->
+                            <TextBlock Text="Truck ID:" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="TruckIdValue" Text="[ID]" Grid.Row="0" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- Make -->
+                            <TextBlock Text="Make:" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="MakeValue" Text="[Make]" Grid.Row="1" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- Model -->
+                            <TextBlock Text="Model:" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="ModelValue" Text="[Model]" Grid.Row="2" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- Year -->
+                            <TextBlock Text="Year:" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="YearValue" Text="[Year]" Grid.Row="3" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- VIN -->
+                            <TextBlock Text="VIN:" Grid.Row="4" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="VINValue" Text="[VIN]" Grid.Row="4" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- License Plate -->
+                            <TextBlock Text="License Plate:" Grid.Row="5" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="LicensePlateValue" Text="[License Plate]" Grid.Row="5" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- Mileage -->
+                            <TextBlock Text="Mileage:" Grid.Row="6" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="MileageValue" Text="[Mileage]" Grid.Row="6" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- Status -->
+                            <TextBlock Text="Status:" Grid.Row="7" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="StatusValue" Text="[Status]" Grid.Row="7" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+                        </Grid>
+                    </GroupBox>
+
+                    <GroupBox Header="Maintenance Information" Padding="10" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Last Service Date -->
+                            <TextBlock Text="Last Service:" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="LastServiceValue" Text="[Last Service Date]" Grid.Row="0" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- Registration Expiration -->
+                            <TextBlock Text="Registration:" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="RegistrationValue" Text="[Registration Expiration]" Grid.Row="1" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+                        </Grid>
+                    </GroupBox>
+                </StackPanel>
+
+                <!-- Right Column: Driver Information and Service History -->
+                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                    <GroupBox Header="Current Driver" Padding="10" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" MinWidth="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Driver Name -->
+                            <TextBlock Text="Driver Name:" Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="DriverNameValue" Text="[Driver Name]" Grid.Row="0" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- Driver License -->
+                            <TextBlock Text="License #:" Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="DriverLicenseValue" Text="[License Number]" Grid.Row="1" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- License Expiration -->
+                            <TextBlock Text="License Expires:" Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="LicenseExpiresValue" Text="[License Expiration]" Grid.Row="2" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+
+                            <!-- Contact Number -->
+                            <TextBlock Text="Contact #:" Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock x:Name="ContactNumberValue" Text="[Contact Number]" Grid.Row="3" Grid.Column="1" Margin="5" VerticalAlignment="Center"/>
+                        </Grid>
+                    </GroupBox>
+
+                    <GroupBox Header="Upcoming Maintenance" Padding="10" Margin="0,0,0,10">
+                        <ListBox Height="100">
+                            <ListBoxItem>Oil Change - Due in 500 miles</ListBoxItem>
+                            <ListBoxItem>Tire Rotation - Due in 1,000 miles</ListBoxItem>
+                            <ListBoxItem>Brake Inspection - Due 06/15/2025</ListBoxItem>
+                        </ListBox>
+                    </GroupBox>
+
+                    <GroupBox Header="Recent Service History" Padding="10">
+                        <DataGrid AutoGenerateColumns="False" IsReadOnly="True" Height="200">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Width="100"/>
+                                <DataGridTextColumn Header="Service Type" Width="150"/>
+                                <DataGridTextColumn Header="Mileage" Width="100"/>
+                                <DataGridTextColumn Header="Cost" Width="100"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </GroupBox>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Footer with Action Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
+            <Button x:Name="BackButton" Content="Back" Width="100" Height="30" Margin="5" Click="BackButton_Click"/>
+            <Button x:Name="EditTruck" Content="Edit" Width="100" Height="30" Margin="5" Click="EditTruck_Click"/>
+            <Button x:Name="DeleteTruck" Content="Delete" Width="100" Height="30" Margin="5" Click="DeleteTruck_Click"/>
+            <Button x:Name="ServiceLog" Content="Service Log" Width="100" Height="30" Margin="5" Click="ServiceLog_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

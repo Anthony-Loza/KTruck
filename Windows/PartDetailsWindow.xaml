@@ -1,0 +1,405 @@
+﻿<Window x:Class="KTruckGui.PartDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Part Details" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
+
+    <!-- Window Resources -->
+    <Window.Resources>
+        <!-- Colors -->
+        <Color x:Key="PrimaryColor">#3498db</Color>
+        <Color x:Key="PrimaryDarkColor">#2c3e50</Color>
+        <Color x:Key="PrimaryLightColor">#e8f6ff</Color>
+        <Color x:Key="SecondaryColor">#2ecc71</Color>
+        <Color x:Key="AccentColor">#e74c3c</Color>
+        <Color x:Key="WarningColor">#f39c12</Color>
+        <Color x:Key="WarningLightColor">#fff8e1</Color>
+        <Color x:Key="LightGrayColor">#e9ecef</Color>
+        <Color x:Key="ExtraLightGrayColor">#f8f9fa</Color>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}"/>
+        <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDarkColor}"/>
+        <SolidColorBrush x:Key="PrimaryLightBrush" Color="{StaticResource PrimaryLightColor}"/>
+        <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+        <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+        <SolidColorBrush x:Key="WarningLightBrush" Color="{StaticResource WarningLightColor}"/>
+        <SolidColorBrush x:Key="LightGrayBrush" Color="{StaticResource LightGrayColor}"/>
+        <SolidColorBrush x:Key="ExtraLightGrayBrush" Color="{StaticResource ExtraLightGrayColor}"/>
+
+        <!-- Button Styles -->
+        <Style x:Key="DetailsButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Padding" Value="15,5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" 
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource PrimaryDarkBrush}"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource PrimaryDarkBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Accent Button Style -->
+        <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource DetailsButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#c0392b"/>
+                    <Setter Property="BorderBrush" Value="#c0392b"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Back Button Style -->
+        <Style x:Key="BackButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Padding" Value="15,5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Foreground" Value="#6c757d"/>
+            <Setter Property="Background" Value="{StaticResource ExtraLightGrayBrush}"/>
+            <Setter Property="BorderBrush" Value="#dee2e6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" 
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#dee2e6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Card Style -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="{StaticResource LightGrayBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" Direction="315" Color="#22000000" BlurRadius="5" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Label Style -->
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#6c757d"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Value Style -->
+        <Style x:Key="FieldValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryDarkBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Status Badge Style -->
+        <Style x:Key="StatusBadgeStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource PrimaryLightBrush}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+    </Window.Resources>
+
+    <!-- Main Content -->
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Header -->
+            <RowDefinition Height="*"/>
+            <!-- Content -->
+            <RowDefinition Height="Auto"/>
+            <!-- Footer -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Part Details" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}"
+                      VerticalAlignment="Center" Grid.Column="1" HorizontalAlignment="Center"/>
+
+            <!-- Action Buttons -->
+            <Button Content="← Back" Grid.Column="0" Style="{StaticResource BackButtonStyle}" Click="BackButton_Click"/>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Content="Edit" Width="100" Style="{StaticResource DetailsButtonStyle}" Click="EditPart_Click"/>
+                <Button Content="Delete" Width="100" Margin="10,0,0,0" Style="{StaticResource AccentButtonStyle}" Click="DeletePart_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1" Margin="20,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Part Information Card -->
+            <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource CardStyle}" MinHeight="500">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Part Information" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}" 
+                              Margin="0,0,0,20" Grid.Row="0"/>
+
+                    <StackPanel Grid.Row="1">
+                        <!-- Part ID -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Part ID:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="PartIdValue" Text="101" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Name -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Name:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="NameValue" Text="Engine Filter" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Part Number -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Part Number:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="PartNumberValue" Text="EF-2023-87T" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Category -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Category:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="CategoryValue" Text="Filters" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Price -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Price:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="PriceValue" Text="$45.99" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Current Quantity -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Current Quantity:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="QuantityValue" Text="25" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Min Quantity -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Min Quantity:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="MinQuantityValue" Text="10" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Location -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Location:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="LocationValue" Text="Warehouse A - Section 3" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Last Updated -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Last Updated:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="LastUpdatedValue" Text="04/10/2025" Grid.Column="1" Style="{StaticResource FieldValueStyle}"/>
+                        </Grid>
+
+                        <!-- Status -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Status:" Grid.Column="0" Style="{StaticResource FieldLabelStyle}"/>
+                            <Border Grid.Column="1" Style="{StaticResource StatusBadgeStyle}">
+                                <TextBlock x:Name="StatusValue" Text="In Stock" FontSize="12" Foreground="#0072ce" HorizontalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Part Image and Compatible Trucks -->
+            <Grid Grid.Column="1" Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Part Image Section -->
+                <Border Grid.Row="0" Style="{StaticResource CardStyle}" Height="340">
+                    <Border Background="{StaticResource ExtraLightGrayBrush}" BorderBrush="{StaticResource LightGrayBrush}" 
+                           BorderThickness="1" Margin="10" CornerRadius="5">
+                        <!-- Image placeholder -->
+                        <Grid>
+                            <Rectangle Width="170" Height="90" Fill="{StaticResource LightGrayBrush}" 
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="Part Image" Foreground="#6c757d" FontSize="14" 
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+                </Border>
+
+                <!-- Compatible Trucks -->
+                <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="10,0,10,10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Compatible Trucks" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}" 
+                                  Margin="0,0,0,15" Grid.Row="0"/>
+
+                        <Border Grid.Row="1" Background="{StaticResource ExtraLightGrayBrush}" BorderBrush="{StaticResource LightGrayBrush}" 
+                               BorderThickness="1" Padding="15" CornerRadius="5">
+                            <StackPanel>
+                                <TextBlock Text="• Peterbilt 389 (2020-2025)" Foreground="{StaticResource PrimaryDarkBrush}" Margin="0,0,0,10"/>
+                                <TextBlock Text="• Kenworth W900 (2019-2025)" Foreground="{StaticResource PrimaryDarkBrush}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Supplier Information -->
+            <Border Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource CardStyle}" Margin="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Supplier Information" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}" 
+                              Margin="0,0,0,15" Grid.Row="0"/>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Primary Supplier -->
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Primary Supplier:" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="SupplierValue" Text="SuperTruck Parts Inc." Foreground="{StaticResource PrimaryDarkBrush}"/>
+                        </StackPanel>
+
+                        <!-- Supplier Part Number -->
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Supplier Part #:" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="SupplierPartNumberValue" Text="STP-87452" Foreground="{StaticResource PrimaryDarkBrush}"/>
+                        </StackPanel>
+
+                        <!-- Last Order Date -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Last Order Date:" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="LastOrderDateValue" Text="03/15/2025" Foreground="{StaticResource PrimaryDarkBrush}"/>
+                        </StackPanel>
+
+                        <!-- Lead Time -->
+                        <StackPanel Grid.Column="3">
+                            <TextBlock Text="Lead Time:" Style="{StaticResource FieldLabelStyle}"/>
+                            <TextBlock x:Name="LeadTimeValue" Text="5-7 days" Foreground="{StaticResource PrimaryDarkBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Footer with action buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
+            <Button Content="Order More" Width="150" Height="40" Margin="10,0" Style="{StaticResource DetailsButtonStyle}"/>
+            <Button Content="Track Usage" Width="150" Height="40" Margin="10,0" Style="{StaticResource DetailsButtonStyle}"/>
+            <Button Content="Print Details" Width="150" Height="40" Margin="10,0" Style="{StaticResource DetailsButtonStyle}"/>
+        </StackPanel>
+    </Grid>
+</Window>

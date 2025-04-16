@@ -90,22 +90,17 @@ namespace KTruckGui
 
         private void ViewDetails_Click(object sender, RoutedEventArgs e)
         {
-            if (PartsDataGrid.SelectedItem is Part selectedPart)
+            // Make sure a part is selected
+            if (PartsDataGrid.SelectedItem != null)
             {
-                System.Windows.MessageBox.Show(
-                    $"Part Details:\n\n" +
-                    $"Name: {selectedPart.Name}\n" +
-                    $"Price: {selectedPart.Price}\n" +
-                    $"Quantity: {selectedPart.Quantity}\n" +
-                    $"Vendor: {selectedPart.Vendor}",
-                    "Part Details",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information
-                );
+                var part = (Models.Part)PartsDataGrid.SelectedItem;
+                var detailsWindow = new PartDetailsWindow(part);
+                detailsWindow.Show();
             }
             else
             {
-                System.Windows.MessageBox.Show("Please select a part to view details.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show("Please select a part first.", "No Selection",
+                                              MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

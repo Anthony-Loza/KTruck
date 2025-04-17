@@ -5,9 +5,12 @@ namespace KTruckGui.Models
 {
     public partial class Invoice
     {
+        public decimal Total { get; set; }
+        public List<InvoiceItem> InvoiceItems { get; set; } = new List<InvoiceItem>();
+
         public Invoice()
         {
-            InvoiceItems = new HashSet<InvoiceItem>();
+            InvoiceItems = new List<InvoiceItem>();
         }
 
         public string Id { get; set; }
@@ -18,6 +21,5 @@ namespace KTruckGui.Models
         public string Status { get; set; }
 
         public virtual Customer BillToNavigation { get; set; }
-        public virtual ICollection<InvoiceItem> InvoiceItems { get; set; }
     }
 }

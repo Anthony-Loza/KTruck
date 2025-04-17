@@ -230,13 +230,10 @@
 
 					<!-- Primary Driver -->
 					<TextBlock Text="Primary Driver:" Style="{StaticResource InputLabelStyle}"/>
-					<ComboBox x:Name="DriverComboBox" Style="{StaticResource FormComboBoxStyle}">
-						<ComboBoxItem Content="Michael Johnson"/>
-						<ComboBoxItem Content="David Smith"/>
-						<ComboBoxItem Content="Robert Davis"/>
-					</ComboBox>
+                    <ComboBox x:Name="DriverComboBox" Style="{StaticResource FormComboBoxStyle}"/>
 
-					<!-- Driver License -->
+
+                    <!-- Driver License -->
 					<TextBlock Text="Driver License Number:" Style="{StaticResource InputLabelStyle}"/>
 					<TextBox x:Name="DriverLicenseTextBox" Style="{StaticResource FormTextBoxStyle}"/>
 

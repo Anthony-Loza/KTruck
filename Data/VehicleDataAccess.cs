@@ -64,6 +64,90 @@ namespace KTruckGui.Data
             return vehicles;
         }
 
+        public List<Vehicle> GetVehiclesByCustomerId(string customerId)
+        {
+            List<Vehicle> vehicles = new List<Vehicle>();
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT * FROM Vehicle WHERE AssignmentTo = @CustomerId";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@CustomerId", customerId);
+                    command.CommandTimeout = 30;
+
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        var vehicle = new Vehicle
+                        {
+                            // Use safe methods to read from reader
+                            Id = reader.GetSafeString("Id"),
+                            AssignmentTo = reader.GetSafeString("AssignmentTo"),
+                            Make = reader.GetSafeString("Make"),
+                            Model = reader.GetSafeString("Model"),
+                            Year = reader.GetSafeInt32("Year"),
+                            LicensePlate = reader.GetSafeString("LicensePlate"),
+                            Vin = reader.GetSafeString("VIN"),
+                            Odometer = reader.GetSafeDecimal("Odometer"),
+                            Active = reader.GetSafeBool("Active")
+                        };
+                        vehicles.Add(vehicle);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error retrieving vehicles for customer: {ex.Message}", "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return vehicles;
+        }
+
+        public Vehicle GetVehicleById(string vehicleId)
+        {
+            Vehicle vehicle = null;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT * FROM Vehicle WHERE Id = @VehicleId";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    command.Parameters.AddWithValue("@VehicleId", vehicleId);
+                    command.CommandTimeout = 30;
+
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        vehicle = new Vehicle
+                        {
+                            Id = reader.GetSafeString("Id"),
+                            AssignmentTo = reader.GetSafeString("AssignmentTo"),
+                            Make = reader.GetSafeString("Make"),
+                            Model = reader.GetSafeString("Model"),
+                            Year = reader.GetSafeInt32("Year"),
+                            LicensePlate = reader.GetSafeString("LicensePlate"),
+                            Vin = reader.GetSafeString("VIN"),
+                            Odometer = reader.GetSafeDecimal("Odometer"),
+                            Active = reader.GetSafeBool("Active")
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error retrieving vehicle: {ex.Message}", "Database Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return vehicle;
+        }
+
         public void DeleteVehicle(string vehicleId)
         {
             try

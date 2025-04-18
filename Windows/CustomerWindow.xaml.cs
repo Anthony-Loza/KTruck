@@ -13,6 +13,8 @@ namespace KTruckGui
         private CustomerDataAccess customerDataAccess;
         private Customer selectedCustomer;
 
+        public Customer SelectedCustomer { get; private set;}
+
         public CustomerWindow()
         {
             InitializeComponent();
@@ -45,6 +47,7 @@ namespace KTruckGui
             if (CustomerDataGrid.SelectedItem is Customer customer)
             {
                 selectedCustomer = customer;
+                SelectedCustomer = customer; // Set the public property
 
                 // Update button states based on selection
                 EditCustomerButton.IsEnabled = true;
@@ -55,6 +58,7 @@ namespace KTruckGui
             else
             {
                 selectedCustomer = null;
+                SelectedCustomer = null; // Clear the public property
 
                 // Disable buttons that require selection
                 EditCustomerButton.IsEnabled = false;
@@ -204,4 +208,6 @@ namespace KTruckGui
             }
         }
     }
+
+
 }

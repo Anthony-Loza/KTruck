@@ -1,41 +1,218 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using Microsoft.Win32;
 using KTruckGui.Data;
 using KTruckGui.Models;
 
 namespace KTruckGui
 {
     /// <summary>
-    /// Interaction logic for PartsForm.xaml
+    /// Interaction logic for PartsForm.xaml with integrated Purchase Order functionality
     /// </summary>
-    public partial class PartsForm : Window
+    public partial class PartsForm : Window, INotifyPropertyChanged
     {
-        private PartDataAccess partDataAccess;
+        // Data Access
+        private readonly PartDataAccess _partDataAccess;
+
+        // Models
         private Part _part;
-        public PartsForm(Part part = null)
+        private ObservableCollection<PartPurchaseOrder> _purchaseOrders;
+
+        // Edit Mode Flag
+        private bool _isEditMode;
+
+        // Property Changed Event
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Collection of purchase orders for the part
+        /// </summary>
+        public ObservableCollection<PartPurchaseOrder> PurchaseOrders
         {
-            partDataAccess = new PartDataAccess();
-            InitializeComponent();
-            if (part != null)
+            get => _purchaseOrders;
+            set
             {
-                _part = part;
-                PopulateFields(part);
-                LoadPurchaseOrders();
+                _purchaseOrders = value;
+                OnPropertyChanged(nameof(PurchaseOrders));
             }
         }
 
+        /// <summary>
+        /// Constructor for creating a new part
+        /// </summary>
+        public PartsForm()
+        {
+            InitializeComponent();
+            _partDataAccess = new PartDataAccess();
+            _purchaseOrders = new ObservableCollection<PartPurchaseOrder>();
+            _isEditMode = false;
+
+            DataContext = this;
+            HeaderText.Text = "Add New Part";
+            PartStatusText.Text = "Status: New";
+
+            // Set defaults
+            ActiveCheckBox.IsChecked = true;
+            PODatePicker.SelectedDate = DateTime.Today;
+            SetDefaultValues();
+        }
+
+        /// <summary>
+        /// Constructor for editing an existing part
+        /// </summary>
+        /// <param name="part">The part to edit</param>
+        public PartsForm(Part part)
+        {
+            InitializeComponent();
+            _partDataAccess = new PartDataAccess();
+            _purchaseOrders = new ObservableCollection<PartPurchaseOrder>();
+            _isEditMode = true;
+            _part = part;
+
+            DataContext = this;
+            HeaderText.Text = "Edit Part";
+            PartStatusText.Text = "Status: Existing";
+
+            PopulatePartFields(part);
+            LoadPurchaseOrders();
+            UpdateStockStatus();
+        }
+
+        /// <summary>
+        /// Set default values for a new part
+        /// </summary>
+        private void SetDefaultValues()
+        {
+            // Generate next part ID based on highest current ID
+            try
+            {
+                var parts = _partDataAccess.GetParts();
+                if (parts.Any())
+                {
+                    int maxId = parts.Max(p => p.ID);
+                    IDTextBox.Text = (maxId + 1).ToString();
+                }
+                else
+                {
+                    IDTextBox.Text = "1001";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error generating part ID: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                IDTextBox.Text = "1001";
+            }
+
+            // Default values for other fields
+            QuantityTextBox.Text = "0";
+            MinStockTextBox.Text = "5";
+            ReorderTextBox.Text = "10";
+
+            // Generate a default PO number
+            PONumberTextBox.Text = $"PO-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}";
+        }
+
+        /// <summary>
+        /// Populate fields with part data
+        /// </summary>
+        /// <param name="part">The part to populate from</param>
+        private void PopulatePartFields(Part part)
+        {
+            // Basic Information
+            IDTextBox.Text = part.ID.ToString();
+            NameTextBox.Text = part.Name;
+            DescriptionTextBox.Text = part.Description;
+            LocationTextBox.Text = part.Location;
+            ManufacturerTextBox.Text = part.Manufacturer;
+
+            // Pricing Information
+            UnitPriceTextBox.Text = part.UnitPrice?.ToString("0.00");
+            PriceTextBox.Text = part.Price?.ToString("0.00");
+            MarketPriceTextBox.Text = part.MarketPrice?.ToString("0.00");
+
+            // Inventory Management
+            QuantityTextBox.Text = part.Quantity?.ToString();
+            MinStockTextBox.Text = part.MinimumStockLevel?.ToString();
+            ReorderTextBox.Text = part.ReorderQuantity?.ToString();
+
+            // Supplier Information
+            SupplierTextBox.Text = part.Supplier;
+            VendorTextBox.Text = part.Vendor;
+
+            // Status
+            ActiveCheckBox.IsChecked = part.Active;
+
+            // Generate a default PO number for editing mode
+            PONumberTextBox.Text = $"PO-{DateTime.Now.ToString("yyyyMMdd")}-{part.ID}";
+        }
+
+        /// <summary>
+        /// Load purchase orders for the part
+        /// </summary>
+        private void LoadPurchaseOrders()
+        {
+            try
+            {
+                if (_part != null)
+                {
+                    var purchaseOrders = _partDataAccess.GetPurchaseOrdersForPart(_part.ID);
+                    PurchaseOrders.Clear();
+
+                    foreach (var po in purchaseOrders)
+                    {
+                        // Add custom properties for display that aren't in the database model
+                        po.Supplier = _part.Supplier; // Use the part's supplier for display
+                        po.PONumber = $"PO-{po.DateAdded.ToString("yyyyMMdd")}-{_part.ID}";
+
+                        PurchaseOrders.Add(po);
+                    }
+
+                    PurchaseOrdersDataGrid.ItemsSource = PurchaseOrders;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error loading purchase orders: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Update the stock status display based on current quantity vs. minimum level
+        /// </summary>
+        private void UpdateStockStatus()
+        {
+            if (_part != null && _part.Quantity.HasValue && _part.MinimumStockLevel.HasValue)
+            {
+                if (_part.Quantity.Value <= 0)
+                {
+                    StockStatusText.Text = "Out of stock! Immediate reorder required.";
+                }
+                else if (_part.Quantity.Value < _part.MinimumStockLevel.Value)
+                {
+                    StockStatusText.Text = $"Below minimum stock level! Only {_part.Quantity.Value} remaining.";
+                }
+                else
+                {
+                    StockStatusText.Text = $"In stock: {_part.Quantity.Value} units available";
+                }
+            }
+            else
+            {
+                // For new parts or parts without quantity data
+                StockStatusText.Text = "New part - no stock data available";
+            }
+        }
+
+        /// <summary>
+        /// Save button click handler
+        /// </summary>
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -43,196 +220,292 @@ namespace KTruckGui
                 // Validate ID
                 if (string.IsNullOrWhiteSpace(IDTextBox.Text))
                 {
-                    System.Windows.MessageBox.Show("ID field is required. Please enter a valid ID.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    System.Windows.MessageBox.Show("Part ID is required", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (!int.TryParse(IDTextBox.Text, out var parsedId))
+                if (!int.TryParse(IDTextBox.Text, out int partId))
                 {
-                    System.Windows.MessageBox.Show("Invalid ID. Please enter a numeric value.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    System.Windows.MessageBox.Show("Part ID must be a number", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Check for duplicate ID if adding a new part
-                if (_part == null && partDataAccess.GetParts().Any(p => p.ID == parsedId))
+                // Validate Name
+                if (string.IsNullOrWhiteSpace(NameTextBox.Text))
                 {
-                    System.Windows.MessageBox.Show($"The ID {parsedId} is already in use. Please use a unique ID.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    System.Windows.MessageBox.Show("Part Name is required", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Create or update the part
-                var partToSave = new Part
+                // Validate that ID is not duplicate for new parts
+                if (!_isEditMode && _partDataAccess.GetParts().Any(p => p.ID == partId))
                 {
-                    ID = parsedId,
-                    Name = NameTextBox.Text,
-                    Description = DescriptionTextBox.Text,
-                    Price = decimal.TryParse(PriceTextBox.Text, out var price) ? price : (decimal?)null,
-                    Quantity = int.TryParse(QuantityTextBox.Text, out var quantity) ? quantity : (int?)null,
-                    Vendor = VendorTextBox.Text,
-                    MarketPrice = decimal.TryParse(MarketPriceTextBox.Text, out var marketPrice) ? marketPrice : (decimal?)null,
-                    Manufacturer = ManufacturerTextBox.Text,
-                    Supplier = SupplierTextBox.Text,
-                    QuantityInStock = QuantityInStockTextBox.Text,
-                    UnitPrice = decimal.TryParse(UnitPriceTextBox.Text, out var unitPrice) ? unitPrice : (decimal?)null,
-                    Location = LocationTextBox.Text,
-                    MinimumStockLevel = int.TryParse(MinStockTextBox.Text, out var minStock) ? minStock : (int?)null,
-                    ReorderQuantity = int.TryParse(ReorderTextBox.Text, out var reorderQty) ? reorderQty : (int?)null,
-                    Active = ActiveCheckBox.IsChecked ?? false,
-                    DateAdded = _part?.DateAdded ?? DateTime.Now,
+                    System.Windows.MessageBox.Show($"Part ID {partId} already exists. Please use a different ID.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Create or update part object
+                var part = new Part
+                {
+                    ID = partId,
+                    Name = NameTextBox.Text.Trim(),
+                    Description = DescriptionTextBox.Text.Trim(),
+                    Location = LocationTextBox.Text.Trim(),
+                    Manufacturer = ManufacturerTextBox.Text.Trim(),
+
+                    // Numeric values - parse with fallback to null
+                    UnitPrice = decimal.TryParse(UnitPriceTextBox.Text, out decimal unitPrice) ? unitPrice : (decimal?)null,
+                    Price = decimal.TryParse(PriceTextBox.Text, out decimal price) ? price : (decimal?)null,
+                    MarketPrice = decimal.TryParse(MarketPriceTextBox.Text, out decimal marketPrice) ? marketPrice : (decimal?)null,
+                    Quantity = int.TryParse(QuantityTextBox.Text, out int quantity) ? quantity : (int?)null,
+                    MinimumStockLevel = int.TryParse(MinStockTextBox.Text, out int minStock) ? minStock : (int?)null,
+                    ReorderQuantity = int.TryParse(ReorderTextBox.Text, out int reorderQty) ? reorderQty : (int?)null,
+
+                    // Supplier info
+                    Supplier = SupplierTextBox.Text.Trim(),
+                    Vendor = VendorTextBox.Text.Trim(),
+
+                    // Status
+                    Active = ActiveCheckBox.IsChecked ?? true,
+
+                    // Audit fields
+                    DateAdded = _isEditMode ? _part.DateAdded : DateTime.Now,
                     LastUpdated = DateTime.Now
                 };
 
-                if (_part != null)
+                // Save to database
+                if (_isEditMode)
                 {
-                    partDataAccess.UpdatePart(partToSave);
-                    System.Windows.MessageBox.Show("Part updated successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _partDataAccess.UpdatePart(part);
+                    System.Windows.MessageBox.Show("Part updated successfully", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    partDataAccess.AddPart(partToSave);
-                    System.Windows.MessageBox.Show("Part added successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _partDataAccess.AddPart(part);
+                    System.Windows.MessageBox.Show("Part added successfully", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
-                ClearFormFields();
+                // Ask user if they want to create a purchase order if stock is low
+                if (part.Quantity.HasValue && part.MinimumStockLevel.HasValue &&
+                    part.Quantity.Value < part.MinimumStockLevel.Value)
+                {
+                    var result = System.Windows.MessageBox.Show(
+                        "Current stock is below minimum level. Would you like to create a purchase order now?",
+                        "Low Stock",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // Create a purchase order - you could open a separate window or use the built-in functionality
+                        GeneratePurchaseOrder_Click(sender, e);
+                    }
+                }
+
+                // Close the form
+                DialogResult = true;
                 Close();
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"Error saving part: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-
-
-        private void ClearFormFields()
+        /// <summary>
+        /// Cancel button click handler
+        /// </summary>
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            IDTextBox.Clear();
-            NameTextBox.Clear();
-            DescriptionTextBox.Clear();
-            PriceTextBox.Clear();
-            QuantityTextBox.Clear();
-            VendorTextBox.Clear();
-            MarketPriceTextBox.Clear();
-            ManufacturerTextBox.Clear();
-            SupplierTextBox.Clear();
-            QuantityInStockTextBox.Clear();
-            UnitPriceTextBox.Clear();
-            LocationTextBox.Clear();
-            MinStockTextBox.Clear();
-            ReorderTextBox.Clear();
-            ActiveCheckBox.IsChecked = false;
-        }
-        private void PopulateFields(Part part)
-        {
-            IDTextBox.Text = part.ID.ToString();
-            NameTextBox.Text = part.Name;
-            DescriptionTextBox.Text = part.Description;
-            PriceTextBox.Text = part.Price?.ToString();
-            QuantityTextBox.Text = part.Quantity?.ToString();
-            VendorTextBox.Text = part.Vendor;
-            MarketPriceTextBox.Text = part.MarketPrice?.ToString();
-            ManufacturerTextBox.Text = part.Manufacturer;
-            SupplierTextBox.Text = part.Supplier;
-            QuantityInStockTextBox.Text = part.QuantityInStock;
-            UnitPriceTextBox.Text = part.UnitPrice?.ToString();
-            LocationTextBox.Text = part.Location;
-            MinStockTextBox.Text = part.MinimumStockLevel?.ToString();
-            ReorderTextBox.Text = part.ReorderQuantity?.ToString();
-            ActiveCheckBox.IsChecked = part.Active;
-        }
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
+            DialogResult = false;
+            Close();
         }
 
+        /// <summary>
+        /// Upload PDF purchase order
+        /// </summary>
         private void UploadPDF_Click(object sender, RoutedEventArgs e)
         {
-            if (_part == null)
+            // Require a part ID before uploading  
+            if (!int.TryParse(IDTextBox.Text, out int partId))
             {
-                System.Windows.MessageBox.Show("No part selected. Please select a part before uploading.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Please enter a valid Part ID first.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
+            // Save the part first if in new mode  
+            if (!_isEditMode)
+            {
+                var result = System.Windows.MessageBox.Show(
+                    "You need to save the part before adding purchase orders. Save now?",
+                    "Save Required",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    SaveButton_Click(sender, e);
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            // Open file dialog  
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
                 Filter = "PDF Files|*.pdf",
-                Title = "Select a Purchase Order PDF"
+                Title = "Select Purchase Order PDF"
             };
 
-            if (openFileDialog.ShowDialog() == true)
-            {
-                byte[] pdfData = File.ReadAllBytes(openFileDialog.FileName);
-                string fileName = System.IO.Path.GetFileName(openFileDialog.FileName); // Extract file name
-
-                partDataAccess.AddPurchaseOrderPDF(_part.ID, pdfData, fileName);
-                System.Windows.MessageBox.Show("Purchase Order PDF uploaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                LoadPurchaseOrders(); // Refresh list
-            }
-        }
-        private void LoadPurchaseOrders()
-        {
-            try
-            {
-                var purchaseOrders = partDataAccess.GetPurchaseOrdersForPart(_part.ID);
-                PurchaseOrderList.ItemsSource = purchaseOrders; // Store full objects
-                PurchaseOrderList.DisplayMemberPath = "Filename"; // Show filenames only
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Failed to load purchase orders: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-
-        private void ViewPDF_Click(object sender, RoutedEventArgs e)
-        {
-            if (PurchaseOrderList.SelectedItem is not PartPurchaseOrder selectedOrder)
-            {
-                System.Windows.MessageBox.Show("Please select a purchase order to view.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            byte[] pdfData = partDataAccess.GetPurchaseOrderPDF(selectedOrder.ID);
-
-            if (pdfData == null || pdfData.Length == 0)
-            {
-                System.Windows.MessageBox.Show("Failed to retrieve the PDF file from the database.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            string tempFilePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), selectedOrder.Filename);
-            File.WriteAllBytes(tempFilePath, pdfData);
-
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = tempFilePath,
-                UseShellExecute = true
-            });
-        }
-
-
-        private void DeletePDF_Click(object sender, RoutedEventArgs e)
-        {
-            if (PurchaseOrderList.SelectedItem is PartPurchaseOrder selectedOrder)
+            if (openFileDialog.ShowDialog() == true) // Fix: Correctly compare the result of ShowDialog()  
             {
                 try
                 {
-                    partDataAccess.DeletePurchaseOrderPDF(selectedOrder.ID);
-                    System.Windows.MessageBox.Show("Purchase Order PDF deleted successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                    LoadPurchaseOrders(); // Refresh list after deletion
+                    // Read the PDF file  
+                    byte[] pdfData = File.ReadAllBytes(openFileDialog.FileName);
+                    string fileName = Path.GetFileName(openFileDialog.FileName);
+
+                    // Save to database  
+                    _partDataAccess.AddPurchaseOrderPDF(partId, pdfData, fileName);
+
+                    System.Windows.MessageBox.Show("Purchase Order uploaded successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Refresh the purchase orders list  
+                    LoadPurchaseOrders();
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show($"Failed to delete purchase order: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    System.Windows.MessageBox.Show($"Error uploading PDF: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// View selected PDF purchase order
+        /// </summary>
+        private void ViewPDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (PurchaseOrdersDataGrid.SelectedItem is PartPurchaseOrder po)
+            {
+                try
+                {
+                    // Retrieve the PDF data
+                    byte[] pdfData = _partDataAccess.GetPurchaseOrderPDF(po.ID);
+
+                    if (pdfData == null || pdfData.Length == 0)
+                    {
+                        System.Windows.MessageBox.Show("Could not retrieve PDF data for this purchase order.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    // Create a temporary file
+                    string tempFilePath = Path.Combine(Path.GetTempPath(), po.Filename);
+                    File.WriteAllBytes(tempFilePath, pdfData);
+
+                    // Open with default PDF viewer
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = tempFilePath,
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Error opening PDF: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             else
             {
-                System.Windows.MessageBox.Show("Please select a purchase order to delete.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Please select a purchase order to view.", "Selection Required", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
+        /// <summary>
+        /// Delete selected PDF purchase order
+        /// </summary>
+        private void DeletePDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (PurchaseOrdersDataGrid.SelectedItem is PartPurchaseOrder po)
+            {
+                // Confirm deletion
+                var result = System.Windows.MessageBox.Show(
+                    $"Are you sure you want to delete the purchase order {po.PONumber}?",
+                    "Confirm Delete",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
 
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        // Delete from database
+                        _partDataAccess.DeletePurchaseOrderPDF(po.ID);
+
+                        System.Windows.MessageBox.Show("Purchase Order deleted successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        // Refresh the purchase orders list
+                        LoadPurchaseOrders();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Windows.MessageBox.Show($"Error deleting purchase order: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Please select a purchase order to delete.", "Selection Required", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
+        /// Generate a new purchase order
+        /// </summary>
+        private void GeneratePurchaseOrder_Click(object sender, RoutedEventArgs e)
+        {
+            // Validate that we have the necessary info for a PO
+            if (string.IsNullOrWhiteSpace(SupplierTextBox.Text))
+            {
+                System.Windows.MessageBox.Show("Please enter a supplier name first.", "Missing Information", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Create a customized PO filename
+            string poFileName = $"PO_{DateTime.Now.ToString("yyyyMMdd")}_{NameTextBox.Text.Replace(" ", "_")}.pdf";
+
+            // This would typically open a Purchase Order generator or form
+            System.Windows.MessageBox.Show(
+                "This would generate a new purchase order PDF based on part details.\n\n" +
+                $"Part: {NameTextBox.Text}\n" +
+                $"Supplier: {SupplierTextBox.Text}\n" +
+                $"Quantity to Order: {ReorderTextBox.Text}\n" +
+                $"Unit Price: ${UnitPriceTextBox.Text}",
+                "Generate Purchase Order",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+
+            // For demonstration - in a real implementation, this would create the actual PDF
+            // and then call AddPurchaseOrderPDF with the generated file
+        }
+
+        /// <summary>
+        /// Handle purchase order selection change
+        /// </summary>
+        private void PurchaseOrdersDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Update UI based on selection
+            var isPoSelected = PurchaseOrdersDataGrid.SelectedItem != null;
+            // In a real implementation, you might update preview, enable/disable buttons, etc.
+        }
+
+        /// <summary>
+        /// Notify that a property has changed
+        /// </summary>
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

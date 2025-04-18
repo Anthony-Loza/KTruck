@@ -88,15 +88,8 @@ namespace KTruckGui
                 // Set the data source for the driver dropdown
                 DriverComboBox.ItemsSource = customers;
 
-                // Create a display member formatter
-                DriverComboBox.DisplayMemberPath = "FName"; // Using FName temporarily, we'll fix this next
-
-                // Set a custom display format for the combobox items to show full name
-                DriverComboBox.ItemTemplate = new DataTemplate();
-                var factory = new FrameworkElementFactory(typeof(TextBlock));
-                factory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("FName") { StringFormat = "{0} {1}", ConverterParameter = "{1}" });
-                DriverComboBox.ItemTemplate.VisualTree = factory;
-
+                // Use the Name property that combines first and last name
+                DriverComboBox.DisplayMemberPath = "Name";
                 DriverComboBox.SelectedValuePath = "Id";
             }
             catch (Exception ex)

@@ -133,12 +133,12 @@
         </Grid>
 
         <!-- Trucks DataGrid -->
-        <DataGrid x:Name="TrucksDataGrid" AutoGenerateColumns="False" SelectionChanged="TrucksDataGrid_SelectionChanged">  
+        <DataGrid x:Name="TrucksDataGrid" AutoGenerateColumns="False" SelectionChanged="TrucksDataGrid_SelectionChanged" >  
          <DataGrid.Columns>  
-           <DataGridTextColumn Header="Make" Binding="{Binding Make}" />  
-           <DataGridTextColumn Header="Model" Binding="{Binding Model}" />  
-           <DataGridTextColumn Header="Year" Binding="{Binding Year}" />  
-           <DataGridTextColumn Header="License Plate" Binding="{Binding LicensePlate}" />  
+           <DataGridTextColumn Header="Make" Binding="{Binding Make}" Width="*" />  
+           <DataGridTextColumn Header="Model" Binding="{Binding Model}" Width="*"/>  
+           <DataGridTextColumn Header="Year" Binding="{Binding Year}" Width="*" />  
+           <DataGridTextColumn Header="License Plate" Binding="{Binding LicensePlate}" Width="*" />  
          </DataGrid.Columns>  
         </DataGrid>
 

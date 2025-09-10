@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace KTruckGui
+﻿namespace KTruckGui
 {
+    // Keep this namespace exactly (your XAML uses xmlns:local="clr-namespace:KTruckGui")
     public static class TypeValues
     {
-        public static readonly List<string> AllTypes = new() { "part", "labor" };
-    }
+        // What your XAML expects:
+        public static readonly string[] AllTypes = new[]
+        {
+            "part",   // taxed in your totals logic
+            "labor",  // not taxed
+            "fee"     // not taxed (example)
+        };
 
+        // (Optional) Keep the name we discussed earlier too — harmless if unused:
+        public static readonly string[] InvoiceItemTypes = AllTypes;
+    }
 }

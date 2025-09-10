@@ -197,9 +197,7 @@ namespace KTruckGui
 
         private void NewJob_Click(object sender, RoutedEventArgs e)
         {
-            // Open the New Job Window
-            var jobWindow = new WorkOrdersWindow();
-            jobWindow.Show();
+
         }
 
         private void NewInvoice_Click(object sender, RoutedEventArgs e)
@@ -214,12 +212,6 @@ namespace KTruckGui
             // Open the New Customer Window
             var customerFormWindow = new CustomerForm();
             customerFormWindow.Show();
-        }
-
-        private void CreateWorkOrder_Click(object sender, RoutedEventArgs e)
-        {
-            var workOrdersWindow = new WorkOrdersWindow();  
-            workOrdersWindow.ShowDialog();
         }
     }
 }

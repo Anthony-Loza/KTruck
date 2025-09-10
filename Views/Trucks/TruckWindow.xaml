@@ -1,11 +1,11 @@
-﻿<Window x:Class="KTruckGui.CustomerWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        Title="Customer Management" Height="800" Width="1200"
-        WindowStartupLocation="CenterScreen">
+﻿<Window x:Class="KTruckGui.VehicleWindow"
+       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+       mc:Ignorable="d"
+       Title="Truck Management" Height="800" Width="1200"
+       WindowStartupLocation="CenterScreen">
 
     <!-- Window Resources -->
     <Window.Resources>
@@ -32,7 +32,7 @@
         <SolidColorBrush x:Key="ExtraLightGrayBrush" Color="{StaticResource ExtraLightGrayColor}"/>
 
         <!-- Button Styles -->
-        <Style x:Key="CustomerButtonStyle" TargetType="Button">
+        <Style x:Key="TruckButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="35"/>
             <Setter Property="Padding" Value="15,5"/>
             <Setter Property="Margin" Value="5"/>
@@ -44,12 +44,12 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="4">
+                               BorderBrush="{TemplateBinding BorderBrush}"
+                               BorderThickness="1"
+                               CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center" 
-                                              VerticalAlignment="Center" 
-                                              Margin="{TemplateBinding Padding}"/>
+                                             VerticalAlignment="Center" 
+                                             Margin="{TemplateBinding Padding}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -63,7 +63,7 @@
         </Style>
 
         <!-- Accent Button Style -->
-        <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource CustomerButtonStyle}">
+        <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource TruckButtonStyle}">
             <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
             <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
             <Style.Triggers>
@@ -75,7 +75,7 @@
         </Style>
 
         <!-- DataGrid Style -->
-        <Style x:Key="CustomerDataGridStyle" TargetType="DataGrid">
+        <Style x:Key="TruckDataGridStyle" TargetType="DataGrid">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="{StaticResource LightGrayBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -89,16 +89,30 @@
             <Setter Property="HeadersVisibility" Value="Column"/>
             <Setter Property="CanUserResizeRows" Value="False"/>
         </Style>
+
+        <!-- DataGrid Column Header Style -->
+        <Style x:Key="DataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{StaticResource ExtraLightGrayBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource PrimaryDarkBrush}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource LightGrayBrush}"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
     </Window.Resources>
 
+    <!-- Main Grid -->
     <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <!-- Header -->
             <RowDefinition Height="*"/>
-            <!-- DataGrid -->
+            <!-- Content -->
             <RowDefinition Height="Auto"/>
-            <!-- Action Buttons -->
+            <!-- Footer/Controls -->
         </Grid.RowDefinitions>
 
         <!-- Header -->
@@ -108,53 +122,33 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Customer Management" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}"
-                       VerticalAlignment="Center" Grid.Column="0"/>
+            <TextBlock Text="Truck Management" FontSize="24" FontWeight="Bold" Foreground="{StaticResource PrimaryDarkBrush}"
+                     VerticalAlignment="Center" Grid.Column="0"/>
 
             <!-- Search Box -->
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <TextBox x:Name="SearchBox" Width="250" Height="35" VerticalContentAlignment="Center" Padding="10,0" Margin="0,0,10,0"/>
-                <Button Content="Search" Width="80" Height="35" Style="{StaticResource CustomerButtonStyle}" Click="Search_Click"/>
+                <Button Content="Search" Width="80" Height="35" Style="{StaticResource TruckButtonStyle}" Click="Search_Click"/>
             </StackPanel>
         </Grid>
 
-        <!-- Main Content: Customer DataGrid -->
-        <Border Grid.Row="1" 
-                Background="White" 
-                BorderBrush="{StaticResource LightGrayBrush}" 
-                BorderThickness="1" 
-                CornerRadius="5"
-                Padding="15"
-                Margin="20,0,20,10">
+        <!-- Trucks DataGrid -->
+        <DataGrid x:Name="TrucksDataGrid" AutoGenerateColumns="False" SelectionChanged="TrucksDataGrid_SelectionChanged" Margin="0,0,0,36" Grid.RowSpan="2">  
+         <DataGrid.Columns>  
+           <DataGridTextColumn Header="Make" Binding="{Binding Make}" />  
+           <DataGridTextColumn Header="Model" Binding="{Binding Model}" />  
+           <DataGridTextColumn Header="Year" Binding="{Binding Year}" />  
+           <DataGridTextColumn Header="License Plate" Binding="{Binding LicensePlate}" />  
+         </DataGrid.Columns>  
+        </DataGrid>
 
-            <!-- Customers DataGrid -->
-            <DataGrid x:Name="CustomerDataGrid" 
-                      Style="{StaticResource CustomerDataGridStyle}"
-                      AutoGenerateColumns="False"
-                      SelectionChanged="CustomerDataGrid_SelectionChanged"
-                      IsReadOnly="True">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="100"/>
-                    <DataGridTextColumn Header="First Name" Binding="{Binding FName}" Width="120"/>
-                    <DataGridTextColumn Header="Last Name" Binding="{Binding LName}" Width="120"/>
-                    <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="100"/>
-                    <DataGridTextColumn Header="Phone" Binding="{Binding Number}" Width="120"/>
-                    <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="180"/>
-                    <DataGridTextColumn Header="Address" Binding="{Binding Address}" Width="180"/>
-                    <DataGridTextColumn Header="City" Binding="{Binding City}" Width="120"/>
-                    <DataGridTextColumn Header="State" Binding="{Binding State}" Width="70"/>
-                    <DataGridTextColumn Header="Zip" Binding="{Binding Zip}" Width="80"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </Border>
-
-        <!-- Action Buttons -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
-            <Button x:Name="NewCustomerButton" Content="New Customer" Width="120" Height="40" Style="{StaticResource CustomerButtonStyle}" Margin="10,0" Click="CreateButton_Click"/>
-            <Button x:Name="EditCustomerButton" Content="Edit Customer" Width="120" Height="40" Style="{StaticResource CustomerButtonStyle}" Margin="10,0" Click="EditButton_Click"/>
-            <Button x:Name="DeleteCustomerButton" Content="Delete Customer" Width="120" Height="40" Style="{StaticResource AccentButtonStyle}" Margin="10,0" Click="DeleteButton_Click"/>
-            <Button x:Name="ViewDetailsButton" Content="View Details" Width="120" Height="40" Style="{StaticResource CustomerButtonStyle}" Margin="10,0" Click="ViewDetails_Click"/>
-            <Button x:Name="CustomerVehiclesButton" Content="Customer Vehicles" Width="140" Height="40" Style="{StaticResource CustomerButtonStyle}" Margin="10,0" Click="CustomerVehicles_Click"/>
+        <!-- Controls -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,20">
+            <Button Content="Add Truck" Width="120" Height="40" Margin="10,0" Style="{StaticResource TruckButtonStyle}" Click="AddTruck_Click"/>
+            <Button Content="Edit Truck" Width="120" Height="40" Margin="10,0" Style="{StaticResource TruckButtonStyle}" Click="EditTruck_Click"/>
+            <Button Content="Delete Truck" Width="120" Height="40" Margin="10,0" Style="{StaticResource AccentButtonStyle}" Click="DeleteTruck_Click"/>
+            <Button Content="View Details" Width="120" Height="40" Margin="10,0" Style="{StaticResource TruckButtonStyle}" Click="ViewDetails_Click"/>
+            <Button Content="Service History" Width="120" Height="40" Margin="10,0" Style="{StaticResource TruckButtonStyle}" Click="ServiceHistory_Click"/>
         </StackPanel>
     </Grid>
 </Window>

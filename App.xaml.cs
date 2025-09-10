@@ -1,36 +1,73 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using QuestPDF.Infrastructure;
-using System;
 using System.IO;
+using System;
 using System.Windows;
-
 
 namespace KTruckGui
 {
-    public partial class App : System.Windows.Application
+    public partial class App : System.Windows.Application  // <-- fully qualified
     {
-        public static IConfiguration? Configuration { get; private set; }
-
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             Console.WriteLine("Application is starting...");
-
             QuestPDF.Settings.License = LicenseType.Community;
-            // Initialize configuration from appsettings.json
-            string connectionString = Environment.GetEnvironmentVariable("DieselShopDb") ?? string.Empty;
 
-            // Verify that the connection string is loaded properly
-            if (string.IsNullOrEmpty(connectionString))
+            string connectionString =
+                Environment.GetEnvironmentVariable("DieselShopDb")
+                ?? Configuration.GetConnectionString("DieselShopDb")
+                ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(connectionString))
             {
-                System.Windows.MessageBox.Show("Connection string could not be found in environment variables. Please verify the configuration.", "Configuration Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                Shutdown(); // Shutdown the app if critical configuration is missing
+                System.Windows.MessageBox.Show(
+                    "Connection string could not be found. " +
+                    "Set the DieselShopDb environment variable or add it to appsettings.json.",
+                    "Configuration Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                Shutdown();
+                return;
             }
-            else
-            {
-                Console.WriteLine("Connection string successfully loaded.");
-            }
+
+            await AppHost.StartAsync();
+
+            var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
+            MainWindow = mainWindow;
+            mainWindow.Show();
+        }
+
+        public static IHost AppHost { get; private set; } = null!;
+        public static IConfiguration Configuration => AppHost.Services.GetRequiredService<IConfiguration>();
+
+        public App()
+        {
+            AppHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration((ctx, cfg) =>
+                {
+                    cfg.SetBasePath(AppContext.BaseDirectory);
+                    cfg.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+                    cfg.AddEnvironmentVariables();
+                })
+                .ConfigureServices((ctx, services) =>
+                {
+                    services.AddTransient<MainWindow>();
+                })
+                .Build();
+        }
+       
+
+
+        protected override async void OnExit(ExitEventArgs e)
+        {
+            await AppHost.StopAsync();
+            AppHost.Dispose();
+            base.OnExit(e);
         }
     }
 }
